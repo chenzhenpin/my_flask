@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Flasky - Page Not Found{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('static', filename='pro/wangEditor-2.1.23/dist/css/wangEditor.min.css') }}"
+          xmlns="http://www.w3.org/1999/html">
+    {#使用代码高亮#}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/highlight/styles/dark.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='pro/wangEditor-2.1.23/dist/js/lib/jquery-1.10.2.min.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static', filename='pro/wangEditor-2.1.23/dist/js/wangEditor.min.js')}}"></script>
+
+{% endblock %}
+{% block page_content %}
+
+        <form method="post" action="{{ url_for('auth.edit',form=form) }}" >
+            <div>{{ form.csrf_token  }}</div>
+            {{ form.context(id="div1",style="height: 400px") }}
+            </br>
+            <div>{{ form.submit(class="btn btn-info" ) }}</div>
+        </form>
+    <div><button id="btn">获取文本</button></div>
+    <div><button id="btn1">销毁编辑器</button></div>
+    <div><button id="btn2">恢复编辑器</button></div>
+
+
+
+<!--这里引用jquery和wangEditor.js-->
+<script type="text/javascript">
+    {#id#}
+    var editor = new wangEditor('div1');
+    editor.config.uploadImgUrl = '{{ url_for('auth.upimage') }}';
+    editor.config.uploadImgFileName = 'myFileName';
+
+    editor.create();
+    //初始化编辑器的内容
+    {% if data %}
+     editor.$txt.html('{{data.context|safe}}');
+    {% endif %}
+
+    // 上传图片（举例）
+
+
+    // 配置自定义参数（举例）
+{#    editor.config.uploadParams = {#}
+{##}
+{#    };#}
+
+
+
+    $("#btn").click(function () {
+         var html = editor.$txt.html();
+        alert(html);
+    });
+    $('#btn1').click(function () {
+    // 销毁编辑器
+        editor.destroy();
+    });
+
+    $('#btn2').click(function () {
+        // 恢复编辑器
+        editor.undestroy();
+    });
+</script>
+{% endblock %}
+
+

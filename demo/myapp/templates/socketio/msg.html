@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>flask-socketio</title>
+</head>
+<body>
+<h1>Hello World</h1>
+<p><span>Only <span id="count"></span>left in stock! Order 123now!</span></p>
+<input type="text" id="msg" name="msg" style="width: 400px">
+<br>
+<br>
+<input type="button" id="btn" name="send" value="发送" > &nbsp;&nbsp;&nbsp;<input type="text" id="join_room" style="width: 100px">&nbsp;<input type="button" id="join" value="加入房间">&nbsp;&nbsp;<input type="text" id="leave_room" style="width: 100px">&nbsp;<input type="button" id="leave" value="离开房间">
+<br>
+<br>
+<textarea style="width: 600px;height: 400px" id="text"></textarea>
+</body>
+<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+    var namespace = '/test';
+    var socket = io.connect('http://' + document.domain + ':' + location.port+namespace);
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+    socket.on('myresponse', function(message) {
+        alert(message['data']);
+    });
+    $("#btn").click(function() {
+        socket.emit('msg', {data:$("#msg").val()});
+    });
+    $("#join").click(function() {
+        socket.emit('join', {room:$("#join_room").val()});
+    });
+    $("#leave").click(function() {
+        socket.emit('leave', {room:$("#leave_room").val()});
+    });
+    socket.on('msgresponse', function(message) {
+        alert(message['data']);
+        $("#msg").val("");
+        $('#text').val( $('#text').val()+'\r\n'+message['data']);
+
+    });
+    socket.on('join_response', function(message) {
+        alert(message['data']);
+    });
+    socket.on('leave_response', function(message) {
+        alert(message['data']);
+    });
+    socket.on('room_worker', function(message) {
+        alert(message['data']);
+    });
+
+</script>
+</html>

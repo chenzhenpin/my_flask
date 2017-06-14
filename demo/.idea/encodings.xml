@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/celery_worker.py" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/myapp/__init__.py" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/myapp/socket_msg.py" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/myapp/static/pro/fileinput/cz.js" charset="UTF-8" />
+  </component>
+</project>

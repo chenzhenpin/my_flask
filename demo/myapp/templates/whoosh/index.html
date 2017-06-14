@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Bootstrap 实例 - 面包屑导航</title>
+	<link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<form class="navbar-form navbar-left" role="search">
+  <div class="form-group"><input type="text" class="form-control" placeholder="Search" id="search">
+    <textarea id="json" style="display:block"><li>nihao</li></textarea>
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
+<script>
+$(document).ready(function(){
+  $("#search").bind('input onpropertychange',function(){
+      $.ajax({ url: "/whoosh", data:{'search':$("#search").val()},type:'post', dataType: 'json',
+          success: function(data){
+          if (data){
+              for (i in data ){
+                  alert(i);
+               alert(data[i]);
+              }
+
+
+          }
+      }});
+  });
+});
+</script>
+
+
+</body>
+</html>

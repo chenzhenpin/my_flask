@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>flask-socketio</title>
+</head>
+<body>
+<h1>Hello World</h1>
+<p id="test">test</p>
+
+</body>
+<script type="text/javascript" charset="utf-8">
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+    socket.on('myresponse', function(message) {
+        socket.emit('msg', {data: 'are you ok '});
+        alert(message['data']);
+    });
+</script>
+</html>
