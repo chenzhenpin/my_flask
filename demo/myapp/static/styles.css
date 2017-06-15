@@ -29,20 +29,18 @@ div.post-date {
     float: right;
 }
 div.post-author {
-    font-weight: bold;
     position:relative;
-    left:50px;
 }
 div.post-body{
     position:relative;
-    left:40px;
+    left:100px;
 }
 div.post-thumbnail {
     position: absolute;
 }
 div.post-content {
     margin-left: 48px;
-    min-height: 48px;
+    min-height: 88px;
 }
 div.post-footer {
     text-align: right;

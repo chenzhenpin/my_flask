@@ -247,7 +247,8 @@ def uploadfile():
         # print(name)
         name=str(time.time())[:10]
         #修改save源码
-        filename = photos.save(file, 'temp', name=name + '.')
+        filepath = photos.save(file, 'temp', name=name + '.')
+        filename=filepath.split('/')[1]
         #获取文件绝对路径
         # file_path = photos.path(filename)
         # dir_name,file_name=os.path.split(file_path)
@@ -262,7 +263,7 @@ def uploadfile():
         else:
             import urllib
             print(file_url)
-            return jsonify({'status':'1','msg':'上传成功','path':filename})
+            return jsonify({'status':'1','msg':'上传成功','filename':filename})
             # res = Response(file_url)
             # res.headers["ContentType"] = "text/html"
             # res.headers["Charset"] = "utf-8"

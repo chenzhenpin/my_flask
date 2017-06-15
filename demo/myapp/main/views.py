@@ -9,6 +9,8 @@ from flask_login import login_required,current_user
 from ..models import User,Role,Post,Comment,Whoosh,Permission
 from ..celery_email import sub
 from ..decorators import admin_required, permission_required
+from ..defs import datedir
+import os,shutil
 
 #报告缓慢的数据库查询
 @main.after_app_request
@@ -114,14 +116,29 @@ def img(username):
 @main.route('/', methods=['GET', 'POST'])
 def index():
     form = PostForm()
-    current_app.logger.debug('A value for debugging')
-    current_app.logger.warning('A warning occurred (%d apples)', 42)
-    current_app.logger.error('An error occurred')
+    # current_app.logger.debug('A value for debugging')
+    # current_app.logger.warning('A warning occurred (%d apples)', 42)
+    # current_app.logger.error('An error occurred')
+    print(form.validate_on_submit())
     if current_user.can(Permission.WRITE_ARTICLES) and \
     form.validate_on_submit():
-        post = Post(body=form.body.data,
-        author=current_user._get_current_object())
-        db.session.add(post)
+        app = current_app._get_current_object()
+        imgBasePath=app.config['UPLOADED_PHOTOS_DEST']
+        #创建月目录，绝对返回目录路径
+        fileMonth=datedir(imgBasePath)
+        filenames=form.filenames.data
+        if filenames:
+            for filename in filenames.split(';'):
+                #检验文件是否上传
+                print(imgBasePath+'/temp/'+filename)
+                if os.path.isfile(imgBasePath+'/temp/'+filename):
+                    print(imgBasePath+'/temp/'+filename)
+                    print(fileMonth+'/'+filename)
+                    shutil.move(imgBasePath+'/temp/'+filename, fileMonth+'/'+filename)
+
+                    # post = Post(body=form.body.data,
+        # author=current_user._get_current_object())
+        # db.session.add(post)
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     show_followed = False
@@ -136,9 +153,9 @@ def index():
         error_out=False)
     posts = pagination.items
     if session.get('mobile_flags',None):
-        return render_template('index.html', form=form, posts=posts,
+        return render_template('m_index.html', form=form, posts=posts,
                                show_followed=show_followed, pagination=pagination)
-    return render_template('index.html', form=form, posts=posts,
+    return render_template('m_index.html', form=form, posts=posts,
                            show_followed=show_followed, pagination=pagination)
 
 #编辑文章

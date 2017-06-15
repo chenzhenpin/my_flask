@@ -44,10 +44,10 @@ class EditProfileAdminForm(Form):
 
 class PostForm(Form):
     #body = TextAreaField("What's on your mind?", validators=[Required()])
-    cls=HiddenField(default=0)
-    paths=HiddenField()
-    body = PageDownField("What's on your mind?", validators=[Required()])
-    submit = SubmitField('Submit')
+    # cls=HiddenField(default=0)
+    filenames=HiddenField()
+    body = TextAreaField( '',validators=[Required()])
+    submit = SubmitField('发表')
 
 class CommentForm(Form):
     body = StringField('', validators=[Required()])
