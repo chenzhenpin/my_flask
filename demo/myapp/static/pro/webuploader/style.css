@@ -70,7 +70,7 @@ table {
 }
 
 #uploader .queueList {
-    margin: 20px;
+    margin: 5px;
 }
 
 .element-invisible {
@@ -79,12 +79,22 @@ table {
     clip: rect(1px,1px,1px,1px);
 }
 
-#uploader .placeholder {
+/*#uploader .placeholder {
     border: 3px dashed #e6e6e6;
     min-height: 238px;
     padding-top: 158px;
     text-align: center;
     background: url(./image.png) center 93px no-repeat;
+    color: #cccccc;
+    font-size: 18px;
+    position: relative;
+}*/
+#uploader .placeholder {
+    border: 2px dashed #e6e6e6;
+    min-height: 158px;
+    padding-top: 2px;
+    text-align: center;
+    /*background: url(./image.png) center 93px no-repeat;*/
     color: #cccccc;
     font-size: 18px;
     position: relative;
@@ -372,7 +382,8 @@ table {
     position: absolute;
     top: 10px;
     right: 20px;
-    line-height: 40px;
+    /*上传按钮的高度*/
+    line-height: 20px;
 }
 
 #filePicker2 {
@@ -387,12 +398,12 @@ table {
     background: #ffffff;
     border: 1px solid #cfcfcf;
     color: #565656;
-    padding: 0 18px;
+    padding: 0 8px;
     display: inline-block;
     border-radius: 3px;
     margin-left: 10px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 8px;
     float: left;
 }
 #uploader .statusBar .btns .webuploader-pick-hover,

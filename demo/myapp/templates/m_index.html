@@ -4,66 +4,112 @@
 
 
 {% block scripts %}
-{{ super() }}
-{{ pagedown.include_pagedown() }}
-{#    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
+    {{ super() }}
+    {{ pagedown.include_pagedown() }}
+    {#    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.min.js') }}"></script>#}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/style.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.js')}}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/upload.js')}}"></script>
 
-
 {% endblock %}
 
 {% block title %}Flasky - Page Not Found{% endblock %}
 
 {% block page_content %}
-    <div class="page-header">
-        <h1>Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
-        {% if not known %}
-        <p>Pleased to meet you!</p>
-        {% else %}
-        <p>Happy to see you again!</p>
-        {% endif %}
-    </div>
-    <div>
-        {% if current_user.can(Permission.WRITE_ARTICLES) %}
-        {{ wtf.quick_form(form) }}
-        {% endif %}
-    </div>
 
-    <!--dom结构部分-->
-    <div id="uploader">
-        <div class="queueList">
-            <div id="dndArea" class="placeholder">
-                <div id="filePicker"></div>
-                <p>或将照片拖到这里，单次最多可选300张</p>
-            </div>
-        </div>
-        <div class="statusBar" style="display:none;">
-            <div class="progress">
-                <span class="text">0%</span>
-                <span class="percentage"></span>
-            </div><div class="info"></div>
-            <div class="btns">
-                <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
-            </div>
+
+    <div class="row">
+        <div class="page-header">
+            <h1>Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
+            {% if not known %}
+                <p>Pleased to meet you!</p>
+            {% else %}
+                <p>Happy to see you again!</p>
+            {% endif %}
         </div>
     </div>
 
-    <div class="post-tabs">
-    <ul class="nav nav-tabs">
-        <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">All</a></li>
-        {% if current_user.is_authenticated %}
-        <li{% if show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">Followers</a></li>
-        {% endif %}
-    </ul>
-    {% include '_posts.html' %}
+    <div class="row">
+        <div id="left" class="col-md-3 col-sm-3"></div>
+
+        <div id="main" class="col-md-6 col-sm-6">
+
+
+            <div id="send" class="row">
+
+                {% if current_user.can(Permission.WRITE_ARTICLES) %}
+                    <form method="post" action="/">
+                    <div class="row">
+                        <div class="col-md-10"  style="margin-left: 5px;padding-right:25px"  >
+                             <label style="margin-bottom: 5px;color: #00cc66">发表</label>
+                            {{ form.body(class="form-control" ,rows="3") }}
+                            {{ form.cls }}
+                            {{ form.filenames }}
+                            {{ form.csrf_token }}
+                        </div>
+                        <div class="col-md-2"></div>
+                    </div>
+
+                    <div class="row" >
+                        <div class="col-sm-10">
+                            <div id="uploader" >
+                                <div class="queueList">
+                                    <div id="dndArea" class="placeholder">
+                                        <div id="filePicker"></div>
+                                        <p>或将照片拖到这里，单次最多可选300张</p>
+                                    </div>
+                                </div>
+                                <div class="statusBar" style="display:none;">
+                                    <div class="progress">
+                                        <span class="text">0%</span>
+                                        <span class="percentage"></span>
+                                    </div><div class="info"></div>
+                                    <div class="btns">
+                                        <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style=" margin-top: 10px;margin-right: 40px ">
+                        <div class="col-sm-3">
+                            {{ form.submit(class="btn btn-info") }}
+                        </div>
+                    </div>
+                 </form>
+
+                {% endif %}
+            </div>
+
+            <div id="post" class="row">
+                <div class="post-tabs" >
+                    <ul class="nav nav-tabs">
+                        <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">All</a></li>
+                        {% if current_user.is_authenticated %}
+                            <li{% if show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">Followers</a></li>
+                        {% endif %}
+                    </ul>
+                    {% include '_posts.html' %}
+                </div>
+            </div>
+
+            <div id="page" class="row">
+                <div class="pagination ">
+                    {{ macros.pagination_widget(pagination, '.index') }}
+                </div>
+            </div>
+
+
+        </div>
+
+        <div id="right" class="col-md-3 col-sm-3">右侧</div>
+
     </div>
-    <div class="pagination ">
-        {{ macros.pagination_widget(pagination, '.index') }}
-    </div>
+
+
 {% endblock %}
 
 

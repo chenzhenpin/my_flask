@@ -11,6 +11,7 @@ from ..celery_email import sub
 from ..decorators import admin_required, permission_required
 from ..defs import datedir
 import os,shutil
+from ..extension import photos
 
 #报告缓慢的数据库查询
 @main.after_app_request
@@ -119,6 +120,9 @@ def index():
     # current_app.logger.debug('A value for debugging')
     # current_app.logger.warning('A warning occurred (%d apples)', 42)
     # current_app.logger.error('An error occurred')
+    print(form.body.data)
+    print(form.cls.data)
+    print(form.filenames.data)
     print(form.validate_on_submit())
     if current_user.can(Permission.WRITE_ARTICLES) and \
     form.validate_on_submit():
@@ -128,6 +132,7 @@ def index():
         fileMonth=datedir(imgBasePath)
         filenames=form.filenames.data
         if filenames:
+            listpath=[]
             for filename in filenames.split(';'):
                 #检验文件是否上传
                 print(imgBasePath+'/temp/'+filename)
@@ -135,10 +140,13 @@ def index():
                     print(imgBasePath+'/temp/'+filename)
                     print(fileMonth+'/'+filename)
                     shutil.move(imgBasePath+'/temp/'+filename, fileMonth+'/'+filename)
-
-                    # post = Post(body=form.body.data,
-        # author=current_user._get_current_object())
-        # db.session.add(post)
+                    file_url = photos.url(fileMonth+'/'+filename)
+                    print(file_url)
+                    listpath.append(file_url)
+                    print('ok')
+            strpath=';'.join(listpath)
+            post = Post(body=form.body.data,author=current_user._get_current_object(),paths=strpath,cls=form.cls.data)
+            db.session.add(post)
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     show_followed = False
