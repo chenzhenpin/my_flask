@@ -4,13 +4,13 @@
 
 {% block head %}
 {{ super() }}
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
-<link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
+<link rel="shortcut icon" href="{{ url_for('static', filename='logo.jpg') }}" type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" type="image/x-icon">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
 
 {% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
+<div class="navbar" role="navigation" style="margin-bottom: 20px; ">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -19,38 +19,61 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Flasky</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}" style="font-size: 30px;color: #00cc66">椰壳</a>
+            <img src="{{ url_for('static', filename='logo.jpg')}}" style="width: 30px;height: auto;margin-top: 10px;margin-left:0px" >
         </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.index') }}">Home</a></li>
+
+
+        <div class="navbar-collapse collapse " >
+
+            {#<ul>
+                <form class="navbar-form navbar-left " style="margin-left: 8%;">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="">
+                    </div>
+                    <button type="submit" class="btn btn-default">搜索</button>
+                </form>
+            </ul>#}
+
+            <ul class="nav navbar-nav navbar-right" style="margin-top: 5px">
+
+                {#{% if current_user.can(Permission.MODERATE_COMMENTS) %}
+                <li><a href="{{ url_for('main.moderate') }}">Moderate Comments</a></li>
+                {% endif %}#}
                 {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('main.user', username=current_user.username) }}">Profile</a></li>
+                    <li> <img class="img-circle" src="{{ url_for('main.img',username=current_user.username)}}"
+                              style="width:40px; height:40px;text-align: center;padding-top: 3px;text-align: center" >
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-top: 6px">
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('main.user', username=current_user.username) }}">我的主页</a></li>
+                            <li><a href="{{ url_for('auth.change_password') }}">修改密码</a></li>
+                            {#<li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>#}
+                            <li><a href="{{ url_for('auth.logout') }}">退出</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
                 {% endif %}
             </ul>
-            <ul class="nav navbar-nav navbar-right">
-                {% if current_user.can(Permission.MODERATE_COMMENTS) %}
-                <li><a href="{{ url_for('main.moderate') }}">Moderate Comments</a></li>
-                {% endif %}
+
+
+            <ul class="nav navbar-nav navbar-right" style="font-size: 25px;margin-right: 5%">
+                <li><a href="{{ url_for('main.index') }}" style="color: #0e2231">首页</a></li>
+                <li><a href="" style="color: #00a2d4 ">文章</a></li>
+                <li><a href="" style="color: #4cae4c">同城</a></li>
+                <li><a href="" style="color: #b58900;">主题</a></li>
                 {% if current_user.is_authenticated %}
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ url_for('main.img',username=current_user.username)}}" width="30px" height="30">
-                        Account <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
-                        <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
-                        <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
-                    </ul>
-                </li>
-                {% else %}
-                <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+
                 {% endif %}
             </ul>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block content %}

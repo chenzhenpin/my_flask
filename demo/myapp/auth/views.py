@@ -1,5 +1,5 @@
 #coding=utf-8
-from flask import render_template, redirect, request, url_for, flash,session,Response,current_app,jsonify,send_from_directory
+from flask import render_template, redirect, request, url_for, flash,session,Response,current_app,jsonify,send_from_directory,abort
 from . import auth
 from ..models import User
 from ..mogomodels import Context
@@ -8,7 +8,7 @@ from .. import db
 from ..celery_email import send_email
 from flask_login import logout_user, login_required,current_user,login_user
 from flask_uploads import  patch_request_class
-from ..extension import photos
+from ..extension import photos,videos
 from ..defs import datedir
 import time
 import os
@@ -230,43 +230,74 @@ def upimage():
 
 #对文件上传进行相应
 @auth.route("/uploadfile",methods = ["POST"])
+@login_required
 def uploadfile():
-
+    file_url=''
     app = current_app._get_current_object()
-    #创建日期目录
-    #datedir(app.config['UPLOADED_PHOTOS_DEST'])
-    year=time.strftime('%Y',time.localtime(time.time()))
-    #月份
-    month=time.strftime('%m',time.localtime(time.time()))
-    #日期
-    day=time.strftime('%d',time.localtime(time.time()))
-    path=year+'/'+month+'/'+day
+
+    year = time.strftime('%Y', time.localtime(time.time()))
+    # 月份
+    month = time.strftime('%m', time.localtime(time.time()))
+    # 日期
+    day = time.strftime('%d', time.localtime(time.time()))
     files=request.files.getlist("uploadfile")
+    uid=request.form.get('uid',0)
     for file in files:
         # name=file.filename.split('.')[0]
         # print(name)
+        print(uid)
         name=str(time.time())[:10]
-        #修改save源码
-        filepath = photos.save(file, 'temp', name=name + '.')
-        filename=filepath.split('/')[1]
+        if uid=='1':
+            #修改save源码,支持中文文件名称
+            pathname = photos.save(file, 'uploads/img/'+year+'/'+month+'/'+day, name=name + '.')
+            patch_request_class(app, 10 * 1024 * 1024)  # 限制大小10MB
+            # file_url = photos.url(pathname)
+            file_url=pathname
+        if uid=='2':
+            pathname = videos.save(file, 'uploads/video/'+year + '/' + month + '/' + day, name=name + '.')
+            patch_request_class(app, 80 * 1024 * 1024)  # 限制大小80MB
+            # file_url = videos.url(pathname)
+            file_url =pathname
+        #filename=filepath.split('/')[1]
         #获取文件绝对路径
         # file_path = photos.path(filename)
         # dir_name,file_name=os.path.split(file_path)
         # url_name=send_from_directory(dir_name,file_name)
         # print(dir_name)
         # print(url_name)
-        print(filename)
-        patch_request_class(app, 6* 1024 * 1024)#限制大小2MB
-        file_url = photos.url(filename)
-        if filename == None:
-            return jsonify({'status': '0', 'msg': '上传失败'})
-        else:
-            import urllib
-            print(file_url)
-            return jsonify({'status':'1','msg':'上传成功','filename':filename})
-            # res = Response(file_url)
-            # res.headers["ContentType"] = "text/html"
-            # res.headers["Charset"] = "utf-8"
-            # return res
 
+    if file_url == None:
+        print(file_url)
+        return jsonify({'status': '0', 'msg': '上传失败'})
+    else:
+        import urllib
+        print(file_url)
+        return jsonify({'status':'1','msg':'上传成功','file_url':file_url})
+        # res = Response(file_url)
+        # res.headers["ContentType"] = "text/html"
+        # res.headers["Charset"] = "utf-8"
+        # return res
 
+#跨域名装饰器
+
+# from functools import wraps
+# from flask import make_response
+#
+#
+# def allow_cross_domain(fun):
+#     @wraps(fun)
+#     def wrapper_fun(*args, **kwargs):
+#         rst = make_response(fun(*args, **kwargs))
+#         rst.headers['Access-Control-Allow-Origin'] = '*'
+#         rst.headers['Access-Control-Allow-Methods'] = 'PUT,GET,POST,DELETE'
+#         allow_headers = "Referer,Accept,Origin,User-Agent"
+#         rst.headers['Access-Control-Allow-Headers'] = allow_headers
+#         return rst
+#     return wrapper_fun
+#
+#
+#
+# @app.route('/hosts/')
+# @allow_cross_domain
+# def domains():
+#     pass

@@ -43,59 +43,100 @@
         {% endfor %}
     </ul>#}
 
-<ul class="posts" style="margin-top: 20px">
+
+<ul class="posts" style="margin-top: 20px;">
     {% for post in posts %}
     <div class="media" style="margin-top: 30px">
 
-        <div class="media-left media-top">
-            <a href="{{ url_for('.user', username=post.author.username) }}" >
-                <img class="media-object img-circle " src="{{ url_for('main.img',username=post.author.username)}}" alt="..." style=" width: 50px;height: 50px;">
-            </a>
+        <div class="row">
+            <div style="float: left">
+                <a href="{{ url_for('.user', username=post.author.username) }}" >
+                    <img class="media-object " src="{{ url_for('main.img',username=post.author.username)}}" alt="..." style=" width: 50px;height: 50px;">
+                </a>
+            </div>
+            <div style="float: left;margin-left: 2%">
+                <p style="font-size: 16px;color: #00a2d4">{{ post.author.username }}</p>
+                <p style="font-size: 13px;color: #87928a">{{ moment(post.timestamp).fromNow() }}</p>
+            </div>
         </div>
 
 
-            <div class="media-body">
-                <label class="media-heading" style="font-size: 20px">{{ post.author.username }}</label>
-                <label style="margin-left: 10px;font-size: 13px;color: #87928a">{{ moment(post.timestamp).fromNow() }}</label>
-                <p style="font-size: 13px;">
+            <div class="row">
+
+                <div style="font-size: 14px;color: #3c3836;">
                     {% if post.body_html %}
                         {{ post.body_html | safe }}
                     {% else %}
                         {{ post.body }}
                     {% endif %}
-                </p>
-                {% if post.paths%}
-                    {% for path in post.paths.split(';') %}
-                    <div class="row">
-                          <div class="col-xs-6 col-md-3">
-                            <a href="#" class="thumbnail">
-                              <img src="{{ path }}" alt="...">
-                            </a>
-                          </div>
-                          ...
+                </div>
+
+                {% if post.cls==1%}
+
+                    <div class="row" style="padding-left: 15px;margin-top: 10px;margin-bottom: 10px">
+                      <ul class="images" >
+                           {% for file_url in post.file_urls.split(';') %}
+                            <div> <img src="{{ url_for('static',filename=post.file_urls) }}" alt="" style="height:auto;width:24% ;float: left;margin: 2px" ></div>
+                            {% endfor %}
+                      </ul>
                     </div>
-                    {% endfor %}
+                {% elif post.cls==2%}
+                     <div class="row"  >
+                         {#<video id="example_video_1" class="video-js vjs-default-skin vjs-big-play-centered"
+                                controls preload="auto"
+                                data-setup='{"example_option":true}' height=auto width=100% >
+                             <source src="{{post.file_urls}}"  />
+                             <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
+                         </video>#}
+                          <video  height=auto width=98% controls preload="auto" style="padding: 8px">
+{#                             <source src="{{post.file_urls}}"  />#}
+                             <source src="{{ url_for('static',filename=post.file_urls) }}" />
+                             <p>To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
+                         </video>
+                    </div>
                 {% endif %}
-                <div class="post-footer" style="margin-top: 10px">
-                    {% if current_user == post.author %}
-                        <a href="{{ url_for('.edit', id=post.id) }}">
-                            <span class="label label-primary">Edit</span>
-                        </a>
-                    {% elif current_user.is_administrator() %}
-                        <a href="{{ url_for('.edit', id=post.id) }}">
-                            <span class="label label-danger">Edit [Admin]</span>
-                        </a>
-                    {% endif %}
-                    <a href="{{ url_for('.post', id=post.id) }}">
-                        <span class="label label-default">Permalink</span>
+                <div class="post-footer" style="margin-top: 10px;clear: both">
+{#                    {% if current_user == post.author %}#}
+{#                        <a href="{{ url_for('.edit', id=post.id) }}">#}
+{#                            <span class="label label-primary">Edit</span>#}
+{#                        </a>#}
+{#                    {% elif current_user.is_administrator() %}#}
+{#                        <a href="{{ url_for('.edit', id=post.id) }}">#}
+{#                            <span class="label label-danger">Edit [Admin]</span>#}
+{#                        </a>#}
+{#                    {% endif %}#}
+                     <a href="{{ url_for('.post', id=post.id) }}" style="text-decoration:none">
+                        <label style="color: #5f6d64;padding-left: 8px;font-size: 15px">
+                            <span class="glyphicon glyphicon-eye-open"></span>
+                            <span>{{ post.comments.count()}}</span>
+                        </label>
                     </a>
-                    <a href="{{ url_for('.post', id=post.id) }}#comments">
-                        <span class="label label-primary">
-                        {{ post.comments.count() }} Comments
-                        </span>
+
+                    <a onclick="heart({{post.id}},{{ post.hearts.count()}})" style="text-decoration:none">
+                        <label style="color: #5f6d64;padding-left: 8px;font-size: 15px">
+                            <span class="glyphicon glyphicon-thumbs-up"></span>
+                            <span id="{{post.id}}">{{ post.hearts.count()}}</span>
+                        </label>
                     </a>
+                    <a href="{{ url_for('.post', id=post.id) }}#comments" style="text-decoration:none">
+                        <label style="color: #5f6d64;padding: 8px;font-size: 15px">
+                            <span class="glyphicon glyphicon-edit "></span>
+                            <span>{{ post.comments.count()}}</span>
+                        </label>
+                    </a>
+                </div>
+                <div class="post-footer-message">
+                    {% for user in post.hearts_user -%}
+                        {% if loop.first %}
+                            {% set listname=user.username|trim %}
+                        {% else %}
+                            {% set listname='、'~user.username|trim %}
+                        {% endif %}
+                        <label style="color: #00a2d4">{{(listname|filter)~'觉得赞' }}</label>
+                    {% endfor %}
                 </div>
             </div>
     </div>
     {% endfor %}
 </ul>
+

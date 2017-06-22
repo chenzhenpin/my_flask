@@ -1,7 +1,7 @@
 #coding=utf-8
 from flask import Flask,request,session
 from myapp.extension import socketio,db,login_manager,pagedown,moment,\
-                            bootstrap,babel,admin,toolbar,mogodb,mail,photos
+                            bootstrap,babel,admin,toolbar,mogodb,mail,photos,videos
 import flask_whooshalchemyplus
 from flask_uploads import configure_uploads
 from config import config,Config
@@ -14,6 +14,8 @@ celery = Celery(__name__,backend=Config.CELERY_RESULT_BACKEND,broker=Config.CELE
 
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
+
+
 def create_app(config_name):
     from .main import main as main_blueprint
     from .auth import auth as auth_blueprint
@@ -35,6 +37,7 @@ def create_app(config_name):
     babel.init_app(app)
     bootstrap.init_app(app)
     configure_uploads(app, photos)
+    configure_uploads(app, videos)
     mail.init_app(app)
     moment.init_app(app)
     db.init_app(app)
@@ -52,6 +55,13 @@ def create_app(config_name):
     app.register_blueprint(socket_io_blueprint)
     app.register_blueprint(mongo_blueprint,url_prefix='/mongo')
     sslify = SSLify(app)
+
+    #自定义过滤器
+    @app.template_filter('reverse')
+    def filter(s):
+        return s[0:50]
+
+    app.jinja_env.filters['filter'] = filter
     return app
 
 

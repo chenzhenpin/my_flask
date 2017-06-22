@@ -20,6 +20,8 @@ class Config:
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
+    #SERVER_NAME='onlysee.6655.la'
+
     MONGODB_DB='test'
     MONGODB_HOST='127.0.0.1'
     MONGODB_PORT=27017
@@ -32,7 +34,8 @@ class Config:
     # UPLOADED_FILES_DEST = '/path/to/the/uploads'
 
     # 如果你的set叫photos，那么这条设置就改成：
-    UPLOADED_PHOTOS_DEST = os.path.join(basedir, r'uploads\img')
+    UPLOADED_PHOTOS_DEST = os.path.join(basedir, r'myapp/static')
+    UPLOADED_VIDEOS_DEST = os.path.join(basedir, r'myapp/static')
     # 你也可以设置一个默认的配置：
     UPLOADS_DEFAULT_DEST = os.path.join(basedir, r'uploads')
     #启用缓慢查询记录功能的配置

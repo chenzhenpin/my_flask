@@ -45,9 +45,9 @@ class EditProfileAdminForm(Form):
 class PostForm(Form):
     #body = TextAreaField("What's on your mind?", validators=[Required()])
     cls=HiddenField()
-    filenames=HiddenField()
+    file_urls=HiddenField()
     body = TextAreaField( '',validators=[Required()])
-    submit = SubmitField('发表')
+    submit = SubmitField('发送')
 
 class CommentForm(Form):
     body = StringField('', validators=[Required()])

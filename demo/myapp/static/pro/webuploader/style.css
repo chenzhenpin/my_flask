@@ -91,24 +91,25 @@ table {
 }*/
 #uploader .placeholder {
     border: 2px dashed #e6e6e6;
-    min-height: 158px;
+    min-height: 200px;
     padding-top: 2px;
     text-align: center;
     /*background: url(./image.png) center 93px no-repeat;*/
     color: #cccccc;
-    font-size: 18px;
+    font-size: 14px;
     position: relative;
 }
 
 #uploader .placeholder .webuploader-pick {
-    font-size: 18px;
+    font-size: 13px;
     background: #00b7ee;
     border-radius: 3px;
-    line-height: 44px;
-    padding: 0 30px;
+    line-height: 30px;
+    padding: 0 10px;
     color: #fff;
     display: inline-block;
-    margin: 20px auto;
+    /*选择按钮*/
+    margin: 80px auto;
     cursor: pointer;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
@@ -374,8 +375,11 @@ table {
 
 #uploader .statusBar .info {
     display: inline-block;
-    font-size: 14px;
+    font-size: 10px;
     color: #666666;
+    margin-bottom: 5px;
+    margin-top:15px ;
+
 }
 
 #uploader .statusBar .btns {

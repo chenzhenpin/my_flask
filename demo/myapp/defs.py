@@ -8,17 +8,17 @@ def datedir(base):
 
     fileYear=base+'/'+year
     fileMonth=fileYear+'/'+month
-    # fileDay=fileMonth+'/'+day
+    fileDay=fileMonth+'/'+day
 
     if not os.path.exists(fileYear):
         os.mkdir(fileYear)
         os.mkdir(fileMonth)
-        # os.mkdir(fileDay)
+        os.mkdir(fileDay)
     else:
         if not os.path.exists(fileMonth):
             os.mkdir(fileMonth)
-            # os.mkdir(fileDay)
-        # else:
-        #     if not os.path.exists(fileDay):
-        #         os.mkdir(fileDay)
-    return fileMonth
+            os.mkdir(fileDay)
+        else:
+            if not os.path.exists(fileDay):
+                os.mkdir(fileDay)
+    return fileDay

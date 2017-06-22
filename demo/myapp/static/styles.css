@@ -114,3 +114,6 @@ div.flask-pagedown-preview h3 {
 .float-left{
     float: left;
 }
+.navbar{
+    padding-top: 25px;
+}

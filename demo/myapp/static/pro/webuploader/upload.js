@@ -1,8 +1,9 @@
 /**
  * Created by chenzhen on 2017/6/15.
  */
-(function( $ ){
-    var ListName = new Array();
+function create(  ){
+
+
     // 当domReady的时候开始初始化
     $(function() {
         var $wrap = $('#uploader'),
@@ -65,7 +66,7 @@
                 } catch ( ex ) {
                     try {
                         version = new ActiveXObject('ShockwaveFlash.ShockwaveFlash')
-                                .GetVariable('$version');
+                            .GetVariable('$version');
                     } catch ( ex2 ) {
                         version = '0.0';
                     }
@@ -77,10 +78,10 @@
             supportTransition = (function(){
                 var s = document.createElement('p').style,
                     r = 'transition' in s ||
-                            'WebkitTransition' in s ||
-                            'MozTransition' in s ||
-                            'msTransition' in s ||
-                            'OTransition' in s;
+                        'WebkitTransition' in s ||
+                        'MozTransition' in s ||
+                        'msTransition' in s ||
+                        'OTransition' in s;
                 s = null;
                 return r;
             })(),
@@ -113,7 +114,7 @@
                     var swf = './expressInstall.swf';
                     // insert flash object
                     var html = '<object type="application/' +
-                            'x-shockwave-flash" data="' +  swf + '" ';
+                        'x-shockwave-flash" data="' +  swf + '" ';
 
                     if (WebUploader.browser.ie) {
                         html += 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" ';
@@ -123,13 +124,13 @@
                         '<param name="movie" value="' + swf + '" />' +
                         '<param name="wmode" value="transparent" />' +
                         '<param name="allowscriptaccess" value="always" />' +
-                    '</object>';
+                        '</object>';
 
                     container.html(html);
 
                 })($wrap);
 
-            // 压根就没有安转。
+                // 压根就没有安转。
             } else {
                 $wrap.html('<a href="http://www.adobe.com/go/getflashplayer" target="_blank" border="0"><img alt="get flash player" src="http://www.adobe.com/macromedia/style_guide/images/160x41_Get_Flash_Player.jpg" /></a>');
             }
@@ -139,15 +140,21 @@
             alert( 'Web Uploader 不支持您的浏览器！');
             return;
         }
-
+        if (fileSum==8){
+            label_text='点击选择图片';
+            uid_data=1;
+        }else {
+            label_text='点击选择视频';
+            uid_data=2;
+        }
         // 实例化
         uploader = WebUploader.create({
             pick: {
                 id: '#filePicker',
-                label: '点击选择图片'
+                label:label_text
             },
             formData: {
-                uid: 123
+                uid: uid_data,
             },
             fileVal :"uploadfile",//设置文件上传域的name。
             dnd: '#dndArea',
@@ -166,9 +173,14 @@
 
             // 禁掉全局的拖拽功能。这样不会出现图片拖进页面的时候，把图片打开。
             disableGlobalDnd: true,
-            fileNumLimit: 300,//文件数
-            fileSizeLimit: 200 * 1024 * 1024,    // 200 M   验证文件总大小是否超出限制, 超出则不允许加入队列
-            fileSingleSizeLimit: 50 * 1024 * 1024    // 50 M  验证单个文件大小是否超出限制, 超出则不允许加入队列。
+            fileNumLimit: fileSum,//文件数
+            fileSizeLimit: flieSizeSum,    // 200 M   验证文件总大小是否超出限制, 超出则不允许加入队列
+            fileSingleSizeLimit: fileSizeOne ,   // 50 M  验证单个文件大小是否超出限制, 超出则不允许加入队列。
+            accept:{
+                title: file_title,
+                extensions: file_extensions,
+                mimeTypes: file_type
+            }
         });
 
         // 拖拽时不接受 js, txt 文件。
@@ -194,10 +206,8 @@
             console.log('here');
         });
         uploader.on('uploadSuccess',function (file,response) {
-            ListName.push(response.filename);
-            $('#filenames').val(ListName.join(';'));
-            alert('ok');
-            alert($('#filenames').val());
+            ListName.push(response.file_url);
+            $('#file_urls').val(ListName.join(';'));
         });
 
         // uploader.on('filesQueued', function() {
@@ -410,25 +420,28 @@
 
         function updateStatus() {
             var text = '', stats;
-
+            var file_type='张照片';
+            if (fileSum==1){
+                file_type='个视频'
+            }
             if ( state === 'ready' ) {
                 text = '选中' + fileCount + '张图片，共' +
-                        WebUploader.formatSize( fileSize ) + '。';
+                    WebUploader.formatSize( fileSize ) + '。';
             } else if ( state === 'confirm' ) {
                 stats = uploader.getStats();
                 if ( stats.uploadFailNum ) {
-                    text = '已成功上传' + stats.successNum+ '张照片至XX相册，'+
-                        stats.uploadFailNum + '张照片上传失败，<a class="retry" href="#">重新上传</a>失败图片或<a class="ignore" href="#">忽略</a>'
+                    text = '已成功上传' + stats.successNum+ file_type+'，'+
+                        stats.uploadFailNum + file_type+'上传失败，<a class="retry" href="#">重新上传</a>失败文件或<a class="ignore" href="#">忽略</a>'
                 }
 
             } else {
                 stats = uploader.getStats();
-                text = '共' + fileCount + '张（' +
-                        WebUploader.formatSize( fileSize )  +
-                        '），已上传' + stats.successNum + '张';
+                text = '共' + fileCount + file_type+'（' +
+                    WebUploader.formatSize( fileSize )  +
+                    '），已上传' + stats.successNum + file_type;
 
                 if ( stats.uploadFailNum ) {
-                    text += '，失败' + stats.uploadFailNum + '张';
+                    text += '，失败' + stats.uploadFailNum + file_type;
                 }
             }
 
@@ -554,7 +567,47 @@
         });
 
         uploader.onError = function( code ) {
-            alert( 'Eroor: ' + code );
+            /*根据允许的文件个数判断是图片还是视频*/
+            if (fileSum==8){
+                /*图片*/
+                switch( code ) {
+                    case 'Q_TYPE_DENIED':
+                        alert('文件类型不被允许，请选择正确的图片文件');
+                        break;
+
+                    case 'Q_EXCEED_NUM_LIMIT':
+                        alert('你所选的图片文件已超过八个');
+                        break;
+
+                    case 'Q_EXCEED_SIZE_LIMIT':
+                        alert('文件总大小已超出允许大小80M');
+                        break;
+                    case 'F_EXCEED_SIZE':
+                        alert('文件大小已超出允许大小10M');
+                        break;
+
+                }
+            }else{
+                /*视频*/
+                switch (code) {
+                    case 'Q_TYPE_DENIED':
+                        alert('文件类型不被允许，请选择正确的视频文件');
+                        break;
+
+                    case 'Q_EXCEED_NUM_LIMIT':
+                        alert('只能上传一个视频文件');
+                        break;
+
+                    case 'Q_EXCEED_SIZE_LIMIT':
+                        alert('文件总大小已超出允许大小80M');
+                        break;
+                    case 'F_EXCEED_SIZE':
+                        alert('文件大小已超出允许大小80M');
+                        break;
+                }
+
+            }
+
         };
 
         $upload.on('click', function() {
@@ -586,4 +639,12 @@
 
 
 
-})( jQuery );
+}( jQuery );
+var ListName = new Array();
+var fileSum=8;//文件个数
+var fileSizeOne=10 * 1024 * 1024;//单个文件大小
+var flieSizeSum=80 * 1024 * 1024;//总文件大小
+var file_extensions ='gif,jpg,jpeg,bmp,png';
+var file_title='image';
+var file_type='image/*';
+create();

@@ -6,7 +6,7 @@ from . import main
 from .forms import EditProfileForm,EditProfileAdminForm,PostForm,CommentForm
 from .. import db
 from flask_login import login_required,current_user
-from ..models import User,Role,Post,Comment,Whoosh,Permission
+from ..models import User,Role,Post,Comment,Whoosh,Permission,Heart
 from ..celery_email import sub
 from ..decorators import admin_required, permission_required
 from ..defs import datedir
@@ -120,32 +120,30 @@ def index():
     # current_app.logger.debug('A value for debugging')
     # current_app.logger.warning('A warning occurred (%d apples)', 42)
     # current_app.logger.error('An error occurred')
-    print(form.body.data)
-    print(form.cls.data)
-    print(form.filenames.data)
-    print(form.validate_on_submit())
+
     if current_user.can(Permission.WRITE_ARTICLES) and \
     form.validate_on_submit():
         app = current_app._get_current_object()
         imgBasePath=app.config['UPLOADED_PHOTOS_DEST']
         #创建月目录，绝对返回目录路径
-        fileMonth=datedir(imgBasePath)
-        filenames=form.filenames.data
-        if filenames:
-            listpath=[]
-            for filename in filenames.split(';'):
-                #检验文件是否上传
-                print(imgBasePath+'/temp/'+filename)
-                if os.path.isfile(imgBasePath+'/temp/'+filename):
-                    print(imgBasePath+'/temp/'+filename)
-                    print(fileMonth+'/'+filename)
-                    shutil.move(imgBasePath+'/temp/'+filename, fileMonth+'/'+filename)
-                    file_url = photos.url(fileMonth+'/'+filename)
-                    print(file_url)
-                    listpath.append(file_url)
-                    print('ok')
-            strpath=';'.join(listpath)
-            post = Post(body=form.body.data,author=current_user._get_current_object(),paths=strpath,cls=form.cls.data)
+        # fileMonth=datedir(imgBasePath)
+        file_urls=form.file_urls.data
+        if file_urls:
+            # listpath=[]
+            # for filename in filenames.split(';'):
+            #     #检验文件是否上传
+            #     print(imgBasePath+'/temp/'+filename)
+            #     if os.path.isfile(imgBasePath+'/temp/'+filename):
+            #         print(imgBasePath+'/temp/'+filename)
+            #         print(fileMonth+'/'+filename)
+            #         shutil.move(imgBasePath+'/temp/'+filename, fileMonth+'/'+filename)
+            #         file_url = photos.url(fileMonth+'/'+filename)
+            #         print(file_url)
+            #         listpath.append(file_url)
+            #         print('ok')
+
+            #strpath=';'.join(listpath)
+            post = Post(body=form.body.data,author=current_user._get_current_object(),file_urls=file_urls,cls=form.cls.data)
             db.session.add(post)
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
@@ -160,6 +158,8 @@ def index():
         page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out=False)
     posts = pagination.items
+    for user in posts[0].hearts_user:
+        print(user.username)
     if session.get('mobile_flags',None):
         return render_template('m_index.html', form=form, posts=posts,
                                show_followed=show_followed, pagination=pagination)
@@ -204,20 +204,20 @@ def unfollow(username):
 def follow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
-        flash('Invalid user.')
+        flash('该用户不存在')
         return redirect(url_for('.index'))
     if current_user.is_following(user):
-        flash('You are already following this user.')
+        flash('你已经关注该用户')
         return redirect(url_for('.user', username=username))
     current_user.follow(user)
-    flash('You are now following %s.' % username)
+    flash('你成功关注了 %s.' % username)
     return redirect(url_for('.user', username=username))
 #查看被关注列表
 @main.route('/followers/<username>')
 def followers(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
-        flash('Invalid user.')
+        flash('该用户不存在')
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     pagination = user.followers.paginate(
@@ -282,6 +282,24 @@ def post(id):
     return render_template('post.html', posts=[post], form=form,
     comments=comments, pagination=pagination)
 
+#点赞
+@main.route('/heart/<int:id>',methods=['GET','POST'])
+def heart(id):
+    print(id)
+    post = Post.query.get_or_404(id)
+    print(post)
+    heart=Heart.query.filter_by(user=current_user._get_current_object(),post=post).first()
+    print('ok')
+    if heart:
+        db.session.delete(heart)
+        return '0'
+    else:
+        heart_add=Heart(post=post, user=current_user._get_current_object())
+        db.session.add(heart_add)
+        return '1'
+
+
+
 @main.route('/moderate')
 @login_required
 @permission_required(Permission.MODERATE_COMMENTS)
@@ -334,8 +352,6 @@ def whoosh():
         return 'ok search'
     # return str(w.id)+'/n'+w.body
     return render_template('whoosh/index.html')
-
-
 
 
 
