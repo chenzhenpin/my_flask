@@ -54,6 +54,48 @@ class Follow(db.Model):
                             primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    disabled = db.Column(db.Boolean)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))#评论的作者
+    by_user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i',
+        'strong']
+        target.body_html = bleach.linkify(bleach.clean(
+        markdown(value, output_format='html'),
+        tags=allowed_tags, strip=True))
+    #返回被点评论文章的用户
+    @property
+    def post_user(self):
+        # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+        #     .filter(Follow.follower_id == self.id)
+        return User.query.join(Post, Post.id == User.id).filter(Post.id == self.post_id)
+
+db.event.listen(Comment.body, 'set', Comment.on_changed_body)
+
+class Heart(db.Model):
+    __tablename__ = 'hearts'
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # 被点赞的用户id
+    by_user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    #返回被点赞的文章用户
+    @property
+    def post_user(self):
+        # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+        #     .filter(Follow.follower_id == self.id)
+        return User.query.join(Post, Post.id == User.id).filter(Post.id == self.post_id)
+
 class User(db.Model,UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -73,6 +115,8 @@ class User(db.Model,UserMixin):
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow) #最后访问时间
     img=db.Column(db.LargeBinary(length=100000))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    #一个模型定义的多个外键都在同另一个模型中，Follow，Comment，Heart都应该定义到User模型的前面否则会有错
     followed = db.relationship('Follow',
                                foreign_keys=[Follow.follower_id],
                                backref=db.backref('follower', lazy='joined'),
@@ -83,9 +127,24 @@ class User(db.Model,UserMixin):
                                 backref=db.backref('followed', lazy='joined'),
                                 lazy='dynamic',
                                 cascade='all, delete-orphan')
-    comments = db.relationship('Comment', backref='author', lazy='dynamic')
-    hearts    =db.relationship('Heart', backref='user', lazy='dynamic')
-    comments = db.relationship('Whoosh', backref='author', lazy='dynamic')
+    comments = db.relationship('Comment',
+                               foreign_keys=[Comment.author_id],
+                               backref=db.backref('author',lazy='joined'),
+                               lazy='dynamic',cascade='all, delete-orphan')
+    by_comments = db.relationship('Comment',
+                                  foreign_keys=[Comment.by_user_id],
+                                  backref=db.backref('by_user',lazy='joined'),
+                                  lazy='dynamic',cascade='all, delete-orphan')
+
+    hearts    =db.relationship('Heart',
+                               foreign_keys=[Heart.user_id],
+                               backref=db.backref('user',lazy='joined'),
+                               lazy='dynamic',cascade='all, delete-orphan')
+    by_hearts= db.relationship('Heart',
+                               foreign_keys=[Heart.by_user_id],
+                               backref=db.backref('by_user',lazy='joined'),
+                               lazy='dynamic',cascade='all, delete-orphan')
+    #comments = db.relationship('Whoosh', backref='author', lazy='dynamic')
 
     def __init__(self,**kwargs):
         super(User,self).__init__(**kwargs)
@@ -278,46 +337,20 @@ class Post(db.Model):
         # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
         #     .filter(Follow.follower_id == self.id)
         return User.query.join(Heart,Heart.user_id==User.id).filter(Heart.post_id==self.id)
+    #返回点赞的用户username字符串
+    @property
+    def hearts_username(self):
+        # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+        #     .filter(Follow.follower_id == self.id)
+        users= User.query.join(Heart,Heart.user_id==User.id).filter(Heart.post_id==self.id)
+        hearts_listname=[]
+        for user in users:
+            hearts_listname.append(user.username)
+        return hearts_listname
 db.event.listen(Post.body, 'set', Post.on_changed_body) #Post.body字段值改变会自动调用Post.on_changed_body函数
 
 
-class Comment(db.Model):
-    __tablename__ = 'comments'
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.Text)
-    body_html = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    disabled = db.Column(db.Boolean)
-    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    @staticmethod
-    def on_changed_body(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i',
-        'strong']
-        target.body_html = bleach.linkify(bleach.clean(
-        markdown(value, output_format='html'),
-        tags=allowed_tags, strip=True))
-    #返回被点评论的用户
-    @property
-    def by_user(self):
-        # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
-        #     .filter(Follow.follower_id == self.id)
-        return User.query.join(Post, Post.id == User.id).filter(Post.id == self.post_id)
 
-db.event.listen(Comment.body, 'set', Comment.on_changed_body)
-
-class Heart(db.Model):
-    __tablename__ = 'hearts'
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    #返回被点赞的用户
-    @property
-    def by_user(self):
-        # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
-        #     .filter(Follow.follower_id == self.id)
-        return User.query.join(Post, Post.id == User.id).filter(Post.id == self.post_id)
 
 class Whoosh(db.Model):
     __searchable__ = ['body']

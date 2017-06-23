@@ -46,56 +46,57 @@
 
 <ul class="posts" style="margin-top: 20px;">
     {% for post in posts %}
-    <div class="media" style="margin-top: 30px">
+    <div class="post-content container-fluid" >
 
         <div class="row">
             <div style="float: left">
                 <a href="{{ url_for('.user', username=post.author.username) }}" >
-                    <img class="media-object " src="{{ url_for('main.img',username=post.author.username)}}" alt="..." style=" width: 50px;height: 50px;">
+                    <img class="media-object img-circle " src="{{ url_for('main.img',username=post.author.username)}}" alt="..." style=" width:40px;height: 40px;">
                 </a>
             </div>
             <div style="float: left;margin-left: 2%">
-                <p style="font-size: 16px;color: #00a2d4">{{ post.author.username }}</p>
-                <p style="font-size: 13px;color: #87928a">{{ moment(post.timestamp).fromNow() }}</p>
+                <p style="font-size: 16px;">{{ post.author.username }}</p>
+                <p style="font-size: 13px;color: #87928a;margin-top: 5px">{{ moment(post.timestamp).fromNow() }}</p>
             </div>
         </div>
 
 
             <div class="row">
 
-                <div style="font-size: 14px;color: #3c3836;">
+                <div class="user-mssage" style="font-size: 14px;color: #3c3836;margin-bottom: 10px;margin-top: 15px">
                     {% if post.body_html %}
-                        {{ post.body_html | safe }}
+                        <p>{{ post.body_html | safe }}</p>
                     {% else %}
-                        {{ post.body }}
+                        <p>{{ post.body }}</p>
                     {% endif %}
                 </div>
-
+                <div class="media">
                 {% if post.cls==1%}
 
-                    <div class="row" style="padding-left: 15px;margin-top: 10px;margin-bottom: 10px">
+                    <div style="margin-top: 10px;margin-bottom: 10px">
                       <ul class="images" >
                            {% for file_url in post.file_urls.split(';') %}
-                            <div> <img src="{{ url_for('static',filename=post.file_urls) }}" alt="" style="height:auto;width:24% ;float: left;margin: 2px" ></div>
+                            <div> <img src="{{ url_for('static',filename=post.file_urls) }}" alt="" style="height:auto;width:25% ;float: left;margin: 2px" ></div>
                             {% endfor %}
                       </ul>
                     </div>
                 {% elif post.cls==2%}
-                     <div class="row"  >
+                     <div >
                          {#<video id="example_video_1" class="video-js vjs-default-skin vjs-big-play-centered"
                                 controls preload="auto"
                                 data-setup='{"example_option":true}' height=auto width=100% >
                              <source src="{{post.file_urls}}"  />
                              <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
                          </video>#}
-                          <video  height=auto width=98% controls preload="auto" style="padding: 8px">
+                          <video  height=auto width=100% controls preload="auto" >
 {#                             <source src="{{post.file_urls}}"  />#}
                              <source src="{{ url_for('static',filename=post.file_urls) }}" />
                              <p>To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
                          </video>
                     </div>
                 {% endif %}
-                <div class="post-footer" style="margin-top: 10px;clear: both">
+                </div>
+                <div class="post-footer" style="margin-top: 10px;float: right;margin-bottom: 5px">
 {#                    {% if current_user == post.author %}#}
 {#                        <a href="{{ url_for('.edit', id=post.id) }}">#}
 {#                            <span class="label label-primary">Edit</span>#}
@@ -118,23 +119,71 @@
                             <span id="{{post.id}}">{{ post.hearts.count()}}</span>
                         </label>
                     </a>
-                    <a href="{{ url_for('.post', id=post.id) }}#comments" style="text-decoration:none">
+                    {#<a href="{{ url_for('.post', id=post.id) }}#comments" style="text-decoration:none">
                         <label style="color: #5f6d64;padding: 8px;font-size: 15px">
-                            <span class="glyphicon glyphicon-edit "></span>
+                            <span class="glyphicon glyphicon-edit " ></span>
+                            <span>{{ post.comments.count()}}</span>
+                        </label>
+                    </a>#}
+                    <a onclick="editping({{ post.id }},{{ post.author_id }},'{{ post.author.username }}')" style="text-decoration:none">
+                        <label style="color: #5f6d64;padding: 8px;font-size: 15px">
+                            <span class="glyphicon glyphicon-edit " ></span>
                             <span>{{ post.comments.count()}}</span>
                         </label>
                     </a>
                 </div>
-                <div class="post-footer-message">
-                    {% for user in post.hearts_user -%}
-                        {% if loop.first %}
-                            {% set listname=user.username|trim %}
-                        {% else %}
-                            {% set listname='、'~user.username|trim %}
-                        {% endif %}
-                        <label style="color: #00a2d4">{{(listname|filter)~'觉得赞' }}</label>
-                    {% endfor %}
+                <div class="post-footer-message" style="clear: both;margin-bottom: 50px;margin-left: 10px;">
+                    {% if post.hearts_username%}
+                        <div style="padding-bottom: 10px;font-size: small;color: #00a2d4;">
+                        <span class="glyphicon glyphicon-heart" style="margin-right: 3px;float: left"></span>
+                        {% for username in post.hearts_username %}
+                            {% if loop.first %}
+                            <a href="{{ url_for('.user', username=username) }}" style="float: left">{{username}}</a>
+                            {% else %}
+                                <span style="float: left">、</span><a href="{{ url_for('.user', username=username) }}" style="float: left">{{username}}</a>
+                            {% endif %}
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                    <hr style="color: #5f6d64;clear: both;">
+
+{#                            {% for name in  listname.s %}#}
+{#                        {% for user in post.hearts_user %}#}
+{#                        {% if loop.first %}<a href="{{ url_for('.user', username=user.username) }}" style="float: left">{{ user.username}}</a>#}
+{#                        {% elif loop.last %}#}
+{##}
+{#                           、<a href="{{ url_for('.user', username=user.username) }}" style="float: left">{{ user.username}}</a>#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+                    {% if post.comments %}
+
+                    <div class="ping-show{{ post.id }}" style="clear: both;font-size: 13px;">
+                            {% for comment in post.comments  %}
+                                <a href="JavaScript:void(0)" >
+                                    <p class="ping-content{{ comment.id }}" onmouseover="pingover({{ comment.id }})" onmouseout="pingout({{ comment.id }})"  onclick="jumpping({{ post.id }},{{ comment.author_id }},'{{ comment.author.username }}')">
+                                    <a href="{{ url_for('.user', username=comment.author.username) }}">{{ comment.author.username }}</a>
+                                    {% if comment.author.username  == comment.by_user.username %}
+                                        :{{ comment.body }}
+                                    {% else %}
+                                        回复<a href="{{ url_for('.user', username=comment.by_user.username) }}">{{ comment.by_user.username }}:</a>{{ comment.body }}
+                                    {% endif %}
+                                </p>
+                                </a>
+
+                            {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="input-group" style="clear: both;padding-top: 20px">
+                        <input type="text" class="form-control" id="pinglun{{ post.id }}" placeholder="">
+                        <input type="hidden" id="by-user-id{{ post.id  }}" value="{{ post.author_id}}">
+                        <input type="hidden" id="username{{ post.id  }}" value="{{ post.author.username }}">
+                        <span class="input-group-btn">
+                            <button class="btn btn-warning" type="button" onclick="pinglun({{ post.id }})">评论</button>
+                        </span>
+                    </div><!-- /input-group -->
+
                 </div>
+
             </div>
     </div>
     {% endfor %}

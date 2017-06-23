@@ -8,20 +8,21 @@
 {% block title %}Flasky - Page Not Found{% endblock %}
 
 {% block page_content %}
-    <div id="main_content" style="margin:3% ">
+    <div class="content" style="margin-right: 1%;margin-left: 1%;">
         {# 页头#}
-        <div class="row"  style="height: 130px ;background-image:url('{{ url_for('static', filename='back.png')}}'); margin-bottom: 20px">
-            <div class="page-header" style="border-bottom: 0px">
-                <h2 style="font-size: 25px;padding-left: 8%;padding-top: 6px;color: #8b8792">很幸运能在最美的青春遇见你!</h2>
-            </div>
+        <div class="row header" style="height:90px;background-image:url('{{ url_for('static', filename='back.png')}}');margin-bottom: 20px;padding-top: -15px ">
+            <h2 style="font-size: 25px;color: #8b8792;padding-left: 5%;padding-top: 30px">很幸运能在最美的青春遇见你!</h2>
         </div>
+
+
+
         {#主体#}
-        <div class="row">
+        <div class="row mian">
             {# 左侧#}
             <div id="left" class="col-md-3 col-sm-3"></div>
 
             {#中间#}
-            <div id="main" class="col-md-6 col-sm-6">
+            <div id="center" class="col-md-6 col-sm-6" style="margin-left: 1%;margin-right:1%">
 
                 <div id="send" class="row">
                     {% if current_user.can(Permission.WRITE_ARTICLES) %}
@@ -34,21 +35,21 @@
                         <div class="row" id="postSay" >
                             <form method="post" action="/">
                                 <div class="row">
-                                    <div class="col-md-11"  style="margin-left: 16px;padding-right:25px"  >
+                                    <div class="col-md-11"  style="margin-left: 16px;padding-right:25px;"  >
                                         {{ form.body(class="form-control",placeholder="文字限制在300个字数以内",style="resize:none;",autofocus="autofocus",required="required") }}
                                         <div style= "position:relative;top: -17px;float: right">
                                             <a><span class="glyphicon glyphicon-camera pop-pick" style="padding-right:2px"></span></a>
                                         </div>
+                                        {{ form.submit(class="btn btn-info",style="clear: both;float: right;padding-right: 20px;padding-left: 20px") }}
                                         {{ form.cls }}
                                         {{ form.file_urls }}
                                         {{ form.csrf_token }}
+
                                     </div>
                                     <div class="col-md-1"></div>
                                 </div>
-                                <div class="row" style=" ">
-                                    <div style="float: right;margin-right: 63px;margin-top: -10px">
-                                        {{ form.submit(class="btn btn-info",style="padding-right: 20px;padding-left: 20px") }}
-                                    </div>
+                                <div class="row" style="  ">
+
                                 </div>
                             </form>
                             {#发表表单#}
@@ -77,8 +78,6 @@
                             </div>
                             {#文件上传#}
                         </div>
-
-
                     {% endif %}
                 </div>
 
@@ -86,10 +85,7 @@
                 {#动态#}
                 <div id="post" class="row" >
                     <div class="post-tabs" >
-                        <ul class="content-tabs" style="margin-top: 20px;margin-bottom: 20px">
-
-                        </ul>
-                        <ul class="nav nav-tabs">
+                        <ul class="nav nav-tabs" style="margin-top: 20px;margin-bottom: 40px;">
                             <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">全部</a></li>
                             {% if current_user.is_authenticated %}
                                 <li{% if show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">关注</a></li>
@@ -100,20 +96,28 @@
                     {#动态#}
                 </div>
 
+
                 {#分页部分#}
                 <div id="page" class="row">
                     <div class="pagination ">
                         {{ macros.pagination_widget(pagination, '.index') }}
                     </div>
                     {#分页部分#}
+                    {#中间#}
                 </div>
-                {#中间#}
+
+                {#主体#}
             </div>
 
+
+
             {#右侧#}
-            <div id="right" class="col-md-3 col-sm-3">右侧</div>
-            {#主体#}
+            <div class="right" class="col-md-3 col-sm-3">右侧</div>
         </div>
+
+
+
+        <div class="footer"></div>
 
     </div>
 {% endblock %}
@@ -208,7 +212,7 @@
             });
 
         };
-
+        {#点赞#}
         function heart(id,count) {
 
             $.post( "/heart/"+id,function (data,status) {
@@ -236,7 +240,62 @@
                 }
 
             );
+
         }
+
+
+    {#发表评论id为文章id,by_user_id为被评论者的用户id,username为被评论者的username#}
+    function pinglun(id){
+
+        var by_user_id=$('#by-user-id'+id).val();
+        var username=$('#username'+id).val();
+        if ($('#pinglun'+id).val()){
+            $.post( "/post/"+id,{'by_user_id':by_user_id,'body':$('#pinglun'+id).val()},function (data,status){
+                var text='';
+                text=$('.ping-show'+id).html();
+                if({{ current_user.id }}==by_user_id){
+
+                        text=text+'<p><a href="{{ url_for('.user', username=current_user.username) }}">{{ current_user.username}}</a>:'+$('#pinglun'+id).val()+'</p>';
+                }else {
+                        text=text+'<p><a href="{{ url_for('.user', username=current_user.username) }}">{{ current_user.username}}</a> 回复'+
+                                  '<a href="{{ url_for('.user', username=username) }}">'+username+'</a>:'+$('#pinglun'+id).val()
+                             +'</p>';
+                }
+                $('.ping-show'+id).html(text);
+                $('#pinglun'+id).val('');
+                $('#pinglun'+id).attr('placeholder','');
+            });
+        }else {
+            alert('评论不能为空');
+        }
+
+    };
+
+    {#鼠标移动到评论信息条目事件#}
+    function pingover(id){
+       $('.ping-content'+id).css('background-color','#c6c5fe');
+    };
+    {#鼠标移除到评论信息条目事件#}
+    function pingout(id){
+       $('.ping-content'+id).css('background-color','white');
+    };
+    {#点击回复某人#}
+    function jumpping(id,by_user_id,username) {
+
+       $('#pinglun'+id).attr('placeholder','回复'+username);
+       $('#pinglun'+id).focus();
+       $('#by-user-id'+id).val(by_user_id);
+       $('#username'+id).val(username);
+
+    }
+    {#点击编辑按钮#}
+    function editping(id,author_id,author_name) {
+        $('#pinglun'+id).attr('placeholder','回复'+author_name);
+        $('#pinglun'+id).focus();
+        $('#by-user-id'+id).val(author_id);
+        $('#username'+id).val(author_name);
+    }
+
     </script>
 
 {% endblock %}
