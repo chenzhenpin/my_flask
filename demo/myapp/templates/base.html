@@ -6,7 +6,6 @@
 {{ super() }}
 <link rel="shortcut icon" href="{{ url_for('static', filename='logo.jpg') }}" type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" type="image/x-icon">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
 
 {% block navbar %}
@@ -34,15 +33,19 @@
 {#                    <button type="submit" class="btn btn-default">搜索</button>#}
 {#                </form>#}
 {#            </ul>#}
-            <ul class="nav navbar-nav " style="font-size: 25px;margin-left: 5%">
+            <ul class="nav navbar-nav " style="font-size: 25px;margin-left: 5%;">
                 <li><a href="{{ url_for('main.index') }}" style="color: #0e2231">首页</a></li>
-                <li><a href="" style="color: #00a2d4 ">文章</a></li>
+                <li><a href="{{ url_for('main.articles') }}" style="color: #00a2d4 ">文章</a></li>
                 <li><a href="" style="color: #4cae4c">同城</a></li>
                 <li><a href="" style="color: #b58900;">主题</a></li>
                 {% if current_user.is_authenticated %}
 
                 {% endif %}
             </ul>
+
+
+
+
             <ul class="nav navbar-nav navbar-right" >
 
                 {#{% if current_user.can(Permission.MODERATE_COMMENTS) %}
@@ -52,7 +55,8 @@
 
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" >
-                            <img class="img-circle" src="{{ url_for('main.img',username=current_user.username)}}"
+
+                            <img class="img-circle" src="{{ url_for('static',filename=current_user.img )}}"
                                  style="width:35px; height:35px; margin-right: 10px;" >
                             <b class="caret" style="margin-bottom: 15px"></b>
                         </a>
@@ -77,8 +81,9 @@
 
 {% block content %}
 <div class="container">
+
     {% for message in get_flashed_messages() %}
-    <div class="alert alert-warning">
+    <div class=" alert alert-warning">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         {{ message }}
     </div>
@@ -89,6 +94,7 @@
 {% endblock %}
 
 {% block scripts %}
-{{ super() }}
-{{ moment.include_moment() }}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    {{ moment.lang("zh-CN") }}
 {% endblock %}

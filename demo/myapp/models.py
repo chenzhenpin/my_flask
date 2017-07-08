@@ -10,7 +10,7 @@ import bleach
 from jieba.analyse.analyzer import ChineseAnalyzer
 from myapp.extension import db,login_manager
 
-
+#op.create_foreign_key()迁移是要清空或删除数据表
 class Role(db.Model,UserMixin):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
@@ -20,7 +20,7 @@ class Role(db.Model,UserMixin):
     #db.relationship() 中的 backref 参数向 User 模型中添加一个 role 属性，该属性的值为Role对象。
     users = db.relationship('User', backref='role')
 
-
+    #要先插入角色否则执行自我关注会报错。
     @staticmethod
     def insert_roles():
         roles = {
@@ -45,7 +45,7 @@ class Role(db.Model,UserMixin):
     def __repr__(self):
         return '<Role %r>' % self.name
 
-#该模型要定义在User模型之前否则执行脚本会出错
+#该模型要定义在User模型之前否则执行脚本会出错.
 class Follow(db.Model):
     __tablename__ = 'follows'
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'),
@@ -59,27 +59,36 @@ class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
-    body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    disabled = db.Column(db.Boolean)
+    disabled = db.Column(db.Boolean,default=1)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))#评论的作者
     by_user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    @staticmethod
-    def on_changed_body(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i',
-        'strong']
-        target.body_html = bleach.linkify(bleach.clean(
-        markdown(value, output_format='html'),
-        tags=allowed_tags, strip=True))
-    #返回被点评论文章的用户
+    article_id = db.Column(db.Integer, db.ForeignKey('articles.id'))
+
+    #返回该条评论文对于的动态用户
     @property
     def post_user(self):
         # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
         #     .filter(Follow.follower_id == self.id)
-        return User.query.join(Post, Post.id == User.id).filter(Post.id == self.post_id)
+        return User.query.join(Post, Post.author_id == User.id).filter(Post.id == self.post_id)
 
-db.event.listen(Comment.body, 'set', Comment.on_changed_body)
+    # 返回该条评论文对于的文章用户
+    @property
+    def article_user(self):
+        # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+        #     .filter(Follow.follower_id == self.id)
+        return User.query.join(Article, Article.author_id == User.id).filter(Article.id == self.article_id)
+
+#收藏模型
+class  Collect(db.Model):
+    __tablename__= 'collects'
+    id=db.Column(db.Integer,primary_key=True)
+    timestamp=db.Column(db.DateTime,index=True,default=datetime.utcnow)
+    user_id=db.Column(db.Integer,db.ForeignKey('users.id'))
+    disabled=db.Column(db.Boolean,default=1)
+    post_id=db.Column(db.Integer,db.ForeignKey('posts.id'))
+    article_id=db.Column(db.Integer,db.ForeignKey('articles.id'))
 
 class Heart(db.Model):
     __tablename__ = 'hearts'
@@ -89,12 +98,19 @@ class Heart(db.Model):
     # 被点赞的用户id
     by_user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    #返回被点赞的文章用户
+    article_id = db.Column(db.Integer, db.ForeignKey('articles.id'))
+    #返回被点赞的动态用户
     @property
     def post_user(self):
         # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
         #     .filter(Follow.follower_id == self.id)
-        return User.query.join(Post, Post.id == User.id).filter(Post.id == self.post_id)
+        return User.query.join(Post, Post.author_id == User.id).filter(Post.id == self.post_id)
+
+    @property
+    def article_user(self):
+        # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+        #     .filter(Follow.follower_id == self.id)
+        return User.query.join(Article, Article.author_id == User.id).filter(Article.id == self.article_id)
 
 class User(db.Model,UserMixin):
     __tablename__ = 'users'
@@ -113,8 +129,11 @@ class User(db.Model,UserMixin):
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.utcnow) #注册时间
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow) #最后访问时间
-    img=db.Column(db.LargeBinary(length=100000))
+    img_url  =db.Column(db.Text)
+    collects=db.relationship('Collect',backref='user',lazy='dynamic')
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    articles = db.relationship('Article', backref='author', lazy='dynamic')
+    file_user = db.relationship('File', backref='author', lazy='dynamic')
 
     #一个模型定义的多个外键都在同另一个模型中，Follow，Comment，Heart都应该定义到User模型的前面否则会有错
     followed = db.relationship('Follow',
@@ -154,6 +173,14 @@ class User(db.Model,UserMixin):
         if self.role is None:
             self.role = Role.query.filter_by(default=True).first()
         self.follow(self)#自己关注自己
+    # def user_init(self):
+    #     if self.role is None:
+    #         if self.email == current_app.config['FLASKY_ADMIN']:
+    #             self.role = Role.query.filter_by(permissions=0xff).first()
+    #     if self.role is None:
+    #         self.role = Role.query.filter_by(default=True).first()
+    #     self.follow(self)#自己关注自己
+
     #确认账户
     #生成令牌
     def generate_confirmation_token(self, expiration=3600):
@@ -267,15 +294,21 @@ class User(db.Model,UserMixin):
         f = self.followed.filter_by(followed_id=user.id).first()
         if f:
             db.session.delete(f)
-    #获取关注者的文章
+    #获取关注者的动态
     @property
     def followed_posts(self):
         return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+            .filter(Follow.follower_id == self.id)
+    #获取关注者的文章
+    @property
+    def follwed_articles(self):
+        return Article.query.join(Follow, Follow.followed_id == Article.author_id) \
             .filter(Follow.follower_id == self.id)
 
     # 是否关注某人
     def is_following(self, user):
         return self.followed.filter_by(followed_id=user.id).first() is not None
+
 
     # 是否被某人关注
     def is_followed_by(self, user):
@@ -290,19 +323,27 @@ class User(db.Model,UserMixin):
                 db.session.add(user)
                 db.session.commit()
 
+    @property
+    def img(self):
+        if self.img_url==None:
+            return 'img/w.jpg'
+        return self.img_url
+
     #返回模型信息
     def __repr__(self):
         return '<User %r>' % self.username
+
 
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
-    cls=db.Column(db.Integer,default=1)
-    file_urls=db.Column(db.String)
+    cls=db.Column(db.Integer,default=0)#类型
+    file_urls=db.Column(db.Text)#上传文件的地址
     disabled = db.Column(db.Boolean)
-    views=db.Column(db.Integer,default=0)
+    collects = db.relationship('Collect', backref='post', lazy='dynamic')
+    views=db.Column(db.Integer,default=1)#浏览次数
     hearts=db.relationship('Heart', backref='post', lazy='dynamic')
     timestamp = db.Column(db.DateTime(), index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -324,30 +365,96 @@ class Post(db.Model):
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
+        #过滤不在白名单的标签
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p']
 
-        target.body_html = bleach.linkify(bleach.clean(
-            markdown(value, output_format='html'),
-            tags=allowed_tags, strip=True))
+        target.body_html = bleach.clean(value,tags=allowed_tags, strip=True)
+
+    # @staticmethod
+    # def on_changed_body(target, value, oldvalue, initiator):
+    #     allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+    #                     'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+    #                     'h1', 'h2', 'h3', 'p']
+    #
+    #     target.body_html = bleach.linkify(bleach.clean(
+    #         markdown(value, output_format='html'),
+    #         tags=allowed_tags, strip=True))
     #获取点赞的用户
+    #发送connect事件
     @property
     def hearts_user(self):
         # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
         #     .filter(Follow.follower_id == self.id)
         return User.query.join(Heart,Heart.user_id==User.id).filter(Heart.post_id==self.id)
-    #返回点赞的用户username字符串
     @property
-    def hearts_username(self):
+    def add_views(self):
+        self.views=self.views+1
+
+
+db.event.listen(Post.body, 'set', Post.on_changed_body) #Post.body字段值改变会自动调用Post.on_changed_body函数
+
+
+#whoosh是在数据插进数据库的时候建立索引，也就是说，
+# 不在whoosh监控下的插入数据库的数据是不能被whoosh索引到的。
+class Article(db.Model):
+    __searchable__ = ['body','title']
+    __analyzer__ = ChineseAnalyzer()
+    __tablename__ = 'articles'
+    id = db.Column(db.Integer, primary_key=True)
+    title=db.Column(db.String(64))
+    body = db.Column(db.Text)
+    body_text = db.Column(db.Text)
+    cls = db.Column(db.Integer, default=0)  # 类型
+    file_urls = db.Column(db.Text)  # 上传文件的地址
+    disabled = db.Column(db.Boolean)
+    views = db.Column(db.Integer, default=1)  # 浏览次数
+    collects = db.relationship('Collect', backref='article', lazy='dynamic')
+    timestamp = db.Column(db.DateTime(), index=True, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    hearts = db.relationship('Heart', backref='article', lazy='dynamic')
+    comments = db.relationship('Comment',backref='article', lazy='dynamic')
+
+    #
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        #过滤所有html标签
+        allowed_tags = []
+        target.body_text = bleach.clean(
+                           markdown(value, output_format='html'),
+                           tags=allowed_tags, strip=True)
+
+    @property
+    def hearts_user(self):
         # return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
         #     .filter(Follow.follower_id == self.id)
-        users= User.query.join(Heart,Heart.user_id==User.id).filter(Heart.post_id==self.id)
-        hearts_listname=[]
-        for user in users:
-            hearts_listname.append(user.username)
-        return hearts_listname
-db.event.listen(Post.body, 'set', Post.on_changed_body) #Post.body字段值改变会自动调用Post.on_changed_body函数
+        return User.query.join(Heart, Heart.user_id == User.id).filter(Heart.article_id == self.id)
+
+    @property
+    def add_views(self):
+        self.views = self.views + 1
+        return self.views
+
+    def __repr__(self):
+        return '<Whoosh %r>' % (self.title)
+db.event.listen(Article.body, 'set', Article.on_changed_body)
+
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
+    file_url=db.Column(db.Text)
+    file_path=db.Column(db.Text)
+    file_name=db.Column(db.String(128))
+    cls=db.Column(db.Integer)
+    file_for=db.Column(db.Integer)
+    file_size=db.Column(db.Integer)
+    status=db.Column(db.Boolean,default=False)
+    timestamp=db.Column(db.DateTime(),default=datetime.utcnow)
+
+
+
+
 
 
 

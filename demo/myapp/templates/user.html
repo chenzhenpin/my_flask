@@ -2,7 +2,7 @@
 {% block title %}Flasky{% endblock %}
 {% block page_content %}
     <div class="page-header">
-        <div><img class="img-rounded profile-thumbnail" src="{{ url_for('main.img',username=user.username)}}" width="150" height="150"></div>
+        <div><img class="img-rounded profile-thumbnail" src="{{ url_for('static',filename=current_user.img )}}"width="150" height="150"></div>
         <div class="profile-header">
         <h1>{{ user.username }}</h1>
         {% if user.name or user.location %}

@@ -1,16 +1,18 @@
 #coding=utf-8
 from flask import Flask,request,session
 from myapp.extension import socketio,db,login_manager,pagedown,moment,\
-                            bootstrap,babel,admin,toolbar,mogodb,mail,photos,videos
+                            bootstrap,babel,admin,toolbar,mogodb,mail,photos,videos,celery
 import flask_whooshalchemyplus
 from flask_uploads import configure_uploads
 from config import config,Config
-from celery import  Celery
+
 from flask_sslify import SSLify
 import re
-celery = Celery(__name__,backend=Config.CELERY_RESULT_BACKEND,broker=Config.CELERY_BROKER_URL)
 
 
+
+
+#setup_periodic_tasks()
 
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
@@ -56,10 +58,10 @@ def create_app(config_name):
     app.register_blueprint(mongo_blueprint,url_prefix='/mongo')
     sslify = SSLify(app)
 
-    #自定义过滤器
+    #自定义过滤器截取字符数
     @app.template_filter('reverse')
     def filter(s):
-        return s[0:50]
+        return s[0:300]
 
     app.jinja_env.filters['filter'] = filter
     return app

@@ -3,16 +3,17 @@ from time import sleep
 from flask import render_template, redirect, url_for,request,flash,abort,current_app,make_response,jsonify,session
 from flask.ext.sqlalchemy import get_debug_queries
 from . import main
-from .forms import EditProfileForm,EditProfileAdminForm,PostForm,CommentForm
+from .forms import EditProfileForm,EditProfileAdminForm,PostForm,EditArticleForm,SearchArticleForm
 from .. import db
 from flask_login import login_required,current_user
-from ..models import User,Role,Post,Comment,Whoosh,Permission,Heart
+from ..models import User,Role,Post,Comment,Whoosh,Permission,Heart,Article,Collect
 from ..celery_email import sub
 from ..decorators import admin_required, permission_required
 from ..defs import datedir
 import os,shutil
 from ..extension import photos
-
+import bleach
+from markdown import markdown
 #报告缓慢的数据库查询
 @main.after_app_request
 def after_request(response):
@@ -123,28 +124,8 @@ def index():
 
     if current_user.can(Permission.WRITE_ARTICLES) and \
     form.validate_on_submit():
-        app = current_app._get_current_object()
-        imgBasePath=app.config['UPLOADED_PHOTOS_DEST']
-        #创建月目录，绝对返回目录路径
-        # fileMonth=datedir(imgBasePath)
-        file_urls=form.file_urls.data
-        if file_urls:
-            # listpath=[]
-            # for filename in filenames.split(';'):
-            #     #检验文件是否上传
-            #     print(imgBasePath+'/temp/'+filename)
-            #     if os.path.isfile(imgBasePath+'/temp/'+filename):
-            #         print(imgBasePath+'/temp/'+filename)
-            #         print(fileMonth+'/'+filename)
-            #         shutil.move(imgBasePath+'/temp/'+filename, fileMonth+'/'+filename)
-            #         file_url = photos.url(fileMonth+'/'+filename)
-            #         print(file_url)
-            #         listpath.append(file_url)
-            #         print('ok')
-
-            #strpath=';'.join(listpath)
-            post = Post(body=form.body.data,author=current_user._get_current_object(),file_urls=file_urls,cls=form.cls.data)
-            db.session.add(post)
+        post = Post(body=form.body.data,author=current_user._get_current_object(),file_urls=form.file_urls.data,cls=form.cls.data)
+        db.session.add(post)
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     show_followed = False
@@ -158,30 +139,106 @@ def index():
         page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out=False)
     posts = pagination.items
-    for user in posts[0].hearts_user:
-        print(user.username)
-    if session.get('mobile_flags',None):
-        return render_template('m_index.html', form=form, posts=posts,
-                               show_followed=show_followed, pagination=pagination)
-    return render_template('m_index.html', form=form, posts=posts,
-                           show_followed=show_followed, pagination=pagination)
 
-#编辑文章
-@main.route('/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def edit(id):
-    post = Post.query.get_or_404(id)
-    if current_user != post.author and \
-    not current_user.can(Permission.ADMINISTER):
-        abort(403)
-    form = PostForm()
+    if session.get('mobile_flags',None):
+        return render_template('index.html', form=form, posts=posts,
+                               show_followed=show_followed, pagination=pagination)
+    return render_template('index.html', form=form, posts=posts,
+                           show_followed=show_followed, pagination=pagination)
+@main.route('/articles', methods=['GET','POST'])
+def articles():
+    form=SearchArticleForm()
+    page = request.args.get('page', 1, type=int)
+    print ('1')
+
+
+
+    show_followed = False
+    if current_user.is_authenticated:
+        show_followed = bool(request.cookies.get('show_followed', ''))
+
     if form.validate_on_submit():
-        post.body = form.body.data
-        db.session.add(post)
+        pagination=Article.query.whoosh_search(form.keyword.data.strip())\
+            .order_by(Article.timestamp.desc()).paginate(
+            page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out=False)
+        articles = pagination.items
+        return render_template('articles.html', show_followed=show_followed, form=form,
+                               articles=articles, pagination=pagination)
+
+    if show_followed:
+        query = current_user.follwed_articles
+    else:
+        query = Article.query
+    query=query.filter_by(disabled=None)
+    pagination = query.order_by(Article.timestamp.desc()).paginate(
+        page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out=False)
+    articles = pagination.items
+
+    return render_template('articles.html',show_followed=show_followed,form=form,
+                           articles=articles,pagination=pagination)
+@main.route('/article/<int:id>',methods=['GET','POST'])
+def article(id):
+    page = request.args.get('page', 1, type=int)
+    article=Article.query.filter_by(id=id).first()
+    article.add_views
+    pagination=Comment.query.filter_by(article=article).order_by(Comment.timestamp.desc()).paginate(
+        page,per_page=current_app.config['FLASKY_ARTICLE_COMMENT_PER_PAGE'],error_out=False
+    )
+    comments = pagination.items
+    if request.method=='POST' and \
+        current_user.can(Permission.WRITE_ARTICLES):
+        body=request.form.get('body')
+        comment=Comment(body=body,author=current_user._get_current_object(),\
+               article_id=article.id)
+        db.session.add(comment)
+        return redirect(url_for('.article',id=article.id))
+    return render_template('article.html',article=article,comments=comments,pagination=pagination)
+
+
+@main.route('/edit/article', methods=['GET', 'POST'])
+@login_required
+def edit_article():
+    form=EditArticleForm()
+    if current_user.can(Permission.WRITE_ARTICLES) and \
+        form.validate_on_submit():
+        # #过滤script标签
+        # allowed_tags = ['script']
+        # body=bleach.linkify(bleach.clean(markdown(form.body.data, output_format='html'), tags=allowed_tags, strip=False))
+        article=Article(body=form.body.data,title=form.title.data.strip(),author=current_user._get_current_object())
+        db.session.add(article)
+        return redirect(url_for('.articles'))
+    return render_template('edit_article.html',form=form)
+#编辑文章
+@main.route('/update/article/<int:id>', methods=['GET', 'POST'])
+@login_required
+def update_article(id):
+    article = Article.query.get_or_404(id)
+    if current_user != article.author :
+        abort(403)
+    form = EditArticleForm()
+    if form.validate_on_submit():
+        article.body = form.body.data
+        article.title=form.title.data
+        db.session.add(article)
         flash('The post has been updated.')
-        return redirect(url_for('post', id=post.id))
-    form.body.data = post.body
-    return render_template('edit_post.html', form=form)
+        return redirect(url_for('.article', id=article.id))
+    form.title.data=article.title
+    form.body.data = article.body
+    return render_template('update_article.html', form=form,id=article.id)
+@main.route('/delete/article/<int:id>',methods=['GET','POST'])
+@login_required
+def delete_article(id):
+    article=Article.query.get_or_404(id)
+    if current_user !=article.author :
+        abort(403)
+    article.disabled=False
+    db.session.add(article)
+    return redirect(url_for('.articles'))
+
+
+
 #取消关注路由
 @main.route('/unfollow/<username>')
 @login_required
@@ -261,18 +318,15 @@ def show_followed():
 
 #评论
 @main.route('/post/<int:id>', methods=['GET', 'POST'])
+@login_required
 def post(id):
     post = Post.query.get_or_404(id)
-
-    #form = CommentForm()
+    # form = CommentForm()
     if request.method=='POST':
         by_user_id = request.form.get('by_user_id', None, type=int)
         body = request.form.get('body', None, type=str)
         by_user=User.query.get_or_404(by_user_id)
         if by_user_id is None or body is None:
-            print(body)
-            print(by_user_id)
-            print(by_user)
             flash('评论失败')
             return 'false'
         comment = Comment(body=body,
@@ -281,39 +335,58 @@ def post(id):
                           by_user=by_user)
         db.session.add(comment)
         return 'ok'
+        # return redirect(url_for('.post', id=post.id, page=-1))
+    page = request.args.get('page', 1, type=int)
+    if page == -1:
+        page = (post.comments.count() - 1) / \
+        current_app.config['FLASKY_COMMENTS_PER_PAGE'] + 1
+    pagination = post.comments.order_by(Comment.timestamp.asc()).paginate(
+                                        page, per_page=current_app.config['FLASKY_COMMENTS_PER_PAGE'],
+                                            error_out=False)
+    comments = pagination.items
+    return render_template('post.html', posts=[post],
+    comments=comments, pagination=pagination)
 
-    return '22'
-
-    #     db.session.add(comment)
-    #     flash('Your comment has been published.')
-    #     return redirect(url_for('.post', id=post.id, page=-1))
-    # page = request.args.get('page', 1, type=int)
-    # if page == -1:
-    #     page = (post.comments.count() - 1) / \
-    #     current_app.config['FLASKY_COMMENTS_PER_PAGE'] + 1
-    # pagination = post.comments.order_by(Comment.timestamp.asc()).paginate(
-    #                                     page, per_page=current_app.config['FLASKY_COMMENTS_PER_PAGE'],
-    #                                         error_out=False)
-    # comments = pagination.items
-    # return render_template('post.html', posts=[post], form=form,
-    # comments=comments, pagination=pagination)
 
 #点赞
 @main.route('/heart/<int:id>',methods=['GET','POST'])
+@login_required
 def heart(id):
-    print(id)
     post = Post.query.get_or_404(id)
-    print(post)
+    post.add_views
     heart=Heart.query.filter_by(user=current_user._get_current_object(),post=post).first()
-    print('ok')
     if heart:
         db.session.delete(heart)
         return '0'
     else:
-        heart_add=Heart(post=post, user=current_user._get_current_object())
+        heart_add=Heart(post=post, user=current_user._get_current_object(),by_user_id=post.author_id)
+        db.session.add(heart_add)
+        return '1'
+@main.route('/article_hearts/<int:id>',methods=['POST'])
+@login_required
+def article_hearts(id):
+    article = Article.query.get_or_404(id)
+    heart=Heart.query.filter_by(user=current_user._get_current_object(),article=article).first()
+    if heart:
+        db.session.delete(heart)
+        return '0'
+    else:
+        heart_add=Heart(article=article, user=current_user._get_current_object())
         db.session.add(heart_add)
         return '1'
 
+@main.route('/article_collect/<int:id>',methods=['POST'])
+@login_required
+def article_collect(id):
+    article=Article.query.get_or_404(id)
+    collect=Collect.query.filter_by(article=article,user=current_user._get_current_object()).first()
+    if collect:
+        db.session.delete(collect)
+        return '0'
+    else:
+        collect_add=Collect(user=current_user._get_current_object(),article=article)
+        db.session.add(collect_add)
+        return '1'
 
 
 @main.route('/moderate')
@@ -363,6 +436,7 @@ def whoosh():
                         k = k + 1
                         result[k]=i.body
                     return jsonify(result)
+                return query
                 return 'i.body'
             return 'ok result'
         return 'ok search'

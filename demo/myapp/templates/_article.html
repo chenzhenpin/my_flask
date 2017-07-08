@@ -1,0 +1,44 @@
+
+<ul class="articles" style="padding: 0px">
+{% for article in articles %}
+    <div  class="row article" style="padding-top: 50px;margin-left: 0px">
+    <div class="article-head">
+        <div style="float: left">
+            <a href="{{ url_for('.user', username=article.author.username) }}" >
+                <img class="media-object img-circle " src="{{ url_for('static',filename=article.author.img )}}" alt="..." style=" width:40px;height: 40px;">
+            </a>
+        </div>
+        <div style="float: left;margin-left: 2%">
+            <p style="font-size: 16px;margin-bottom: 0px">{{ article.author.username }}</p>
+            <p style="font-size: 13px;color: #87928a;margin-top: 0px">{{ moment(article.timestamp).fromNow(refresh=True) }}</p>
+        </div>
+    </div>
+    <div class="article-content" style="clear: both">
+        <div class="article-title">
+            <h4 >
+                <a style="color: black;text-decoration: none" href="{{ url_for('.article',id=article.id) }}"
+                   onmouseover="article_focus($(this))"
+                    onmouseout="article_out($(this))">
+                    {{ article.title }}
+                </a></h4>
+        </div>
+
+
+        <div class="article-body" style="font-size: 14px;color: #3c3836;float: left">
+            {% if article.body_text|length >300 %}
+                {{ article.body_text|safe|filter }}...
+{#                <p style="margin-top: 10px"><a href="{{ url_for('.article',id=article.id) }}">阅读全文</a></p>#}
+            {% else %}
+             {{ article.body_text }}
+            {% endif %}
+        <p style="margin-top: 10px;color: #5f6d64"><label>阅读{{ article.views }}</label>
+            <label>点赞{{ article.hearts.count() }}</label>
+            <label>评论{{ article.comments.count() }}</label>
+        </p>
+
+        </div>
+    </div>
+    </div>
+{% endfor %}
+<hr style="clear: both">
+</ul>

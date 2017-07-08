@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}椰壳-文章{% endblock %}
+{% block page_content %}
+    <div class="content" style="margin-right: 1%;margin-left: 1%;">
+        {# 页头#}
+        <div class="row header" >
+            {#<div class="col-md-7">
+                <img src="{{ url_for('static',filename='img/article_back.jpg') }}" style="width: 100%;height: auto">
+            </div>
+            <div class="col-md-5">
+                <img src="{{ url_for('static',filename='img/article_back.jpg') }}" style="width: 100%;height: auto">
+
+            </div>
+#}
+
+        </div>
+
+
+        {#主体#}
+        <div class="row mian">
+
+            {# 左侧#}
+            <div id="content-left" class="col-md-9  col-sm-9   " style="margin-top: 20px;padding-left: 5%">
+               <h1 style="text-align: center;margin-left: -5%">{{ article.title }}</h1>
+               <div>
+                   {{ article.body|safe }}
+               </div>
+                {% if current_user.is_authenticated %}
+
+                <div class="btn-article" style="text-align: center;margin-top: 50px;margin-bottom: 100px">
+                    <button class="btn btn-danger" style="margin-left: -10%;margin-right: 80px;padding-left: 50px;padding-right: 50px" onclick="article_heart($(this),{{article.id}})">点赞</button>
+                    <button class="btn btn-success" style="padding-right: 50px;padding-left: 50px" onclick="article_collect($(this),{{ article.id }})">收藏</button>
+                </div>
+
+
+                <div class="article_comment" style="margin-bottom: 100px">
+                   <form class="form-horizontal" method="post" action="{{ url_for('.article',id=article.id) }}#article_comment">
+                       <div class="form-group">
+                           <div class="col-md-9 col-md-offset-1" >
+                                <textarea class="form-control" style="resize: none" rows="5" name="body"></textarea>
+                            </div>
+                       </div>
+                       <div class="form-group">
+                           <div class="col-md-10">
+                                <input type="submit" class="btn btn-info  " value="发表"  style="padding-left: 30px;padding-right: 30px;float: right"></input>
+                           </div>
+                       </div>
+
+                   </form>
+                </div>
+                {% else %}
+                    <div class="btn-article" style="text-align: center;margin-top: 50px;margin-bottom: 150px">
+                    <a href="{{ url_for('auth.login') }}"><button class="btn btn-warning" style="margin-left: -10%;margin-right: 80px;padding-left: 50px;padding-right: 50px">登录</button></a>
+                    <a href="{{ url_for('auth.register') }}"><button class="btn btn-default" style="padding-right: 50px;padding-left: 50px">注册</button></a>
+                    </div>
+
+                {% endif %}
+            {% if article.comments.count()!=0 %}
+                <hr>
+
+                <div class="article_show_comments" id="article_comment" style="margin-bottom: 50px">
+                    {% for comment in comments %}
+                        <p>{{ loop.revindex }}楼 <a>{{ comment.author.username }}</a>:{{ comment.body }}</p>
+                    {% endfor %}
+
+
+                    <div id="page" class="row">
+                        <div class="pagination ">
+                            {#指定#article_comment后缀让浏览器滚到id="article_comment"处#}
+                            {{ macros.pagination_widget(pagination, '.article',id=article.id,fragment='#article_comment') }}
+                        </div>
+                    </div>
+
+                </div>
+            {% endif %}
+            </div>
+
+
+            <div class="col-lg-3 col-sm-3" id="article_right" style="margin-top: 60px;">
+
+                {% if current_user.id==article.author.id %}
+
+                    <div class="btn-change" style="text-align: center;margin-top: 50px;margin-bottom: 150px">
+                    <a href="{{ url_for('.update_article',id=article.id) }}"><button class="btn btn-primary" style="margin-bottom:30px;padding-left: 50px;padding-right: 50px">修改</button></a>
+                    <a href="{{ url_for('.delete_article',id=article.id) }}"><button class="btn btn-default" style="padding-right: 50px;padding-left: 50px">删除</button></a>
+                    </div>
+
+                {% else %}
+                <div class="article_author">
+                    <div><img class="img-rounded profile-thumbnail" src="{{ url_for('static',filename=article.author.img )}}" width="120" height="120"></div>
+                    <div class="profile-header">
+                        <h4>{{ article.author.username }}</h4>
+                        <p style="color: #5f6d64">
+                            最近在线   {{ moment(article.author.last_seen).fromNow()}}.
+                        </p>
+                        <p>
+                            {% if current_user.can(Permission.FOLLOW) and article.author != current_user %}
+                                {% if not current_user.is_following(article.author) %}
+                                    <a href="{{ url_for('.follow', username=article.author.username) }}"  class="btn-sm btn-primary">关注</a>
+                                {% else %}
+                                    <a href="{{ url_for('.unfollow', username=article.author.username) }}" class="btn-sm btn-warning" > 取消关注</a>
+                                {% endif %}
+                            {% endif %}
+                            <label style="color: #7f7f7f">粉丝: <span class="badge">{{ article.author.followers.count() - 1 }}</span></label>
+                            <label style="color: #7f7f7f">文章: <span class="badge">{{ article.author.articles.count()}}</span></label>
+
+                        </p>
+                    </div>
+                </div>
+
+                {% endif %}
+            </div>
+        </div>
+
+
+
+
+
+
+        <div class=" row footer">
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+    function article_focus(obj) {
+     obj.css('color','#337ab7');
+    }
+    function article_out(obj) {
+     obj.css('color','black');
+    }
+    function article_heart(obj,id) {
+     $.post('/article_hearts/'+id,function (data) {
+         if (data=='1'){
+            alert('点赞成功');
+         };
+         if (data=='0'){
+             alert('已取消点赞');
+         }
+     });
+    };
+     function article_collect(obj,id) {
+     $.post('/article_collect/'+id,function (data) {
+         if (data=='1'){
+            alert('收藏成功');
+         };
+         if (data=='0'){
+             alert('已取消收藏');
+         }
+     });
+    };
+
+
+    </script>
+{% endblock %}

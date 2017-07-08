@@ -41,8 +41,8 @@
             ratio = window.devicePixelRatio || 1,
 
             // 缩略图大小
-            thumbnailWidth = 110 * ratio,
-            thumbnailHeight = 110 * ratio,
+            thumbnailWidth = 100 * ratio,
+            thumbnailHeight = 100 * ratio,
 
             // 可能有pedding, ready, uploading, confirm, done.
             state = 'pedding',

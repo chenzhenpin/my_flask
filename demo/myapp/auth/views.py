@@ -1,16 +1,16 @@
 #coding=utf-8
 from flask import render_template, redirect, request, url_for, flash,session,Response,current_app,jsonify,send_from_directory,abort
 from . import auth
-from ..models import User
+from ..models import User,File
 from ..mogomodels import Context
-from .forms import EditPostForm,LoginForm,RegistrationForm ,ChangePasswordForm,PasswordResetRequestForm,PasswordResetForm,ChangeEmailForm
+from .forms import RegistrationForm ,LoginForm,ChangePasswordForm,PasswordResetRequestForm,PasswordResetForm,ChangeEmailForm
 from .. import db
 from ..celery_email import send_email
 from flask_login import logout_user, login_required,current_user,login_user
 from flask_uploads import  patch_request_class
 from ..extension import photos,videos
 from ..defs import datedir
-import time
+import time,datetime
 import os
 #过滤未确认账户的用户
 
@@ -55,6 +55,8 @@ def register():
                     password=form.password.data)
         db.session.add(user)
         db.session.commit()
+        # user=User.query.filter_by(username=form.username.data).first()
+        # user.user_init()
         token = user.generate_confirmation_token()
         send_email(user.email, 'Confirm Your Account',
                    'auth/email/confirm', user=user, token=token)
@@ -171,47 +173,49 @@ def change_email(token):
 
 
 
-@auth.route('/edit',methods=['GET', 'POST'])
-def edit():
-    # session['img_token']=random.random(0,9999)
-    form=EditPostForm()
-    if form.validate_on_submit():
-        data=form.context.data
-        context=Context(context=data )
-        if context.save():
-            return 'ok'
-    return render_template("wangeditor/edit.html",form=form)
+# @auth.route('/edit',methods=['GET', 'POST'])
+# def edit():
+#     # session['img_token']=random.random(0,9999)
+#     form=EditPostForm()
+#     if form.validate_on_submit():
+#         data=form.context.data
+#         context=Context(context=data )
+#         if context.save():
+#             return 'ok'
+#     return render_template("wangeditor/edit.html",form=form)
 
 
-@auth.route('/show',methods=['GET', 'POST'])
-def show():
-    # session['img_token'] = random.random(0, 9999)
-    data=Context.objects.first()
-    form = EditPostForm()
-    print(type(data))
-    print(data.context)
-    if form.validate_on_submit():
-        data = form.context.data
-        context = Context(context=data)
-        if context.save():
-            return 'ok'
-    return render_template("wangeditor/edit.html", form=form,data=data)
+# @auth.route('/show',methods=['GET', 'POST'])
+# def show():
+#     # session['img_token'] = random.random(0, 9999)
+#     data=Context.objects.first()
+#     form = EditPostForm()
+#     print(type(data))
+#     print(data.context)
+#     if form.validate_on_submit():
+#         data = form.context.data
+#         context = Context(context=data)
+#         if context.save():
+#             return 'ok'
+#     return render_template("wangeditor/edit.html", form=form,data=data)
+#
+# ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-
-#文件名合法性验证
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+# #文件名合法性验证
+# def allowed_file(filename):
+#     return '.' in filename and \
+#            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 #对文件上传进行相应
 @auth.route("/upimage",methods = ["POST"])
 def upimage():
 
     app = current_app._get_current_object()
-    filename = photos.save(request.files['myFileName'])
-    print(filename)
-    r=patch_request_class(app, 16 * 1024 * 1024)#限制大小
-    print(r)
+    year = time.strftime('%Y', time.localtime(time.time()))
+    # 月份
+    month = time.strftime('%m', time.localtime(time.time()))
+    name = str(time.time())[6:10] + str(time.time())[11:]
+    filename = photos.save(request.files['myFileName'],'uploads/images/'+year+'/'+month,name=name+'.')
+    patch_request_class(app, 16 * 1024 * 1024)#限制大小
     file_url = photos.url(filename)
     if filename == None:
         result = r"error|未成功获取文件，上传失败"
@@ -243,21 +247,26 @@ def uploadfile():
     files=request.files.getlist("uploadfile")
     uid=request.form.get('uid',0)
     for file in files:
-        # name=file.filename.split('.')[0]
-        # print(name)
-        print(uid)
-        name=str(time.time())[:10]
+        file_name=file.filename
+        print(file_name)
+
+        name=str(time.time())[6:10]+str(time.time())[11:]
         if uid=='1':
-            #修改save源码,支持中文文件名称
+            #修改save源码 extension,支持中文文件名称
             pathname = photos.save(file, 'uploads/img/'+year+'/'+month+'/'+day, name=name + '.')
             patch_request_class(app, 10 * 1024 * 1024)  # 限制大小10MB
             # file_url = photos.url(pathname)
-            file_url=pathname
+            file_path = photos.path(pathname)
+            file=File(user_id=current_user.id, file_path=file_path, file_url=pathname, file_name=file_name, cls=uid)
+            db.session.add(file)
+
         if uid=='2':
             pathname = videos.save(file, 'uploads/video/'+year + '/' + month + '/' + day, name=name + '.')
-            patch_request_class(app, 80 * 1024 * 1024)  # 限制大小80MB
+            patch_request_class(app, 200 * 1024 * 1024)  # 限制大小80MB
             # file_url = videos.url(pathname)
-            file_url =pathname
+            file_path = photos.path(pathname)
+            file=File(user_id=current_user.id,file_path=file_path,file_url=pathname,file_name=file_name,cls=uid)
+            db.session.add(file)
         #filename=filepath.split('/')[1]
         #获取文件绝对路径
         # file_path = photos.path(filename)
@@ -266,13 +275,11 @@ def uploadfile():
         # print(dir_name)
         # print(url_name)
 
-    if file_url == None:
-        print(file_url)
+    if pathname == None:
         return jsonify({'status': '0', 'msg': '上传失败'})
     else:
         import urllib
-        print(file_url)
-        return jsonify({'status':'1','msg':'上传成功','file_url':file_url})
+        return jsonify({'status':'1','msg':'上传成功','file_url':pathname})
         # res = Response(file_url)
         # res.headers["ContentType"] = "text/html"
         # res.headers["Charset"] = "utf-8"

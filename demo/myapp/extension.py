@@ -9,10 +9,12 @@ from flask_socketio import SocketIO
 from flask_admin import Admin,AdminIndexView
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_mongoengine import MongoEngine
-from flask_uploads import UploadSet,IMAGES,VIEDO
+from flask_uploads import UploadSet,IMAGES
 from flask_mail import Mail
-
-
+from config import config,Config
+VIEDO= tuple('mp4 wai vai'.split())
+from celery import  Celery
+celery = Celery(__name__,backend=Config.CELERY_RESULT_BACKEND,broker=Config.CELERY_BROKER_URL)
 mail=Mail()
 mogodb=MongoEngine()
 pagedown = PageDown()

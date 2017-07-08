@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}椰壳-发表文章{% endblock %}
+{% block head %}
+
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('static', filename='pro/wangEditor-2.1.23/dist/css/wangEditor.min.css') }}"
+          xmlns="http://www.w3.org/1999/html">
+    {#使用代码高亮#}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/highlight/styles/dark.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='pro/wangEditor-2.1.23/dist/js/lib/jquery-1.10.2.min.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static', filename='pro/wangEditor-2.1.23/dist/js/wangEditor.min.js')}}"></script>
+    {{ super() }}
+{% endblock %}
+{% block page_content %}
+    <form method="post" action="{{ url_for('main.edit_article') }}" >
+        <div style="padding-top: 50px;padding-bottom: 10px;text-align: center">
+      {{ form.title.label(style="padding-right:15px;") }}{{ form.title(id="tilte" ,style="width:400px",placeholder="标题不能为空") }}
+        </div>
+        {{ form.file.label() }}{{ form.file() }}<p style="color: #5c6370">只支持doc,docx,xls.xlsx,pdf,txt,zip后缀的文件，不能超过30M</p>
+    <hr style="clear: both;margin-top: 10px" >
+    <div style="text-align: center;padding-bottom: 80px">
+
+            <div>{{ form.csrf_token  }}</div>
+
+            {{ form.body(id="div1",style="height: 500px;display:none;") }}
+            </br>
+            <div>{{ form.submit(class="btn btn-warning",style="float: left;padding-left:20px;padding-right:20px" ) }}</div>
+            <div><button id="btn" style="float: right" class="btn-default">获取文本</button></div>
+            <div><button id="btn1" style="float: right" class="btn-default">销毁编辑器</button></div>
+            <div><button id="btn2" style="float: right" class="btn-default">恢复编辑器</button></div>
+    </div>
+    </form>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+    {#id#}
+    var editor = new wangEditor('div1');
+    editor.config.uploadImgUrl = '{{ url_for('auth.upimage') }}';
+    editor.config.uploadImgFileName = 'myFileName';
+
+    editor.create();
+    //初始化编辑器的内容
+    {% if data %}
+     editor.$txt.html('{{data.context|safe}}');
+    {% endif %}
+
+    // 上传图片（举例）
+
+
+    // 配置自定义参数（举例）
+{#    editor.config.uploadParams = {#}
+{##}
+{#    };#}
+
+
+
+    $("#btn").click(function () {
+         var html = editor.$txt.html();
+        alert(html);
+    });
+    $('#btn1').click(function () {
+    // 销毁编辑器
+        editor.destroy();
+    });
+
+    $('#btn2').click(function () {
+        // 恢复编辑器
+        editor.undestroy();
+    });
+</script>
+{% endblock %}

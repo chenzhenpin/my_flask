@@ -1,0 +1,86 @@
+{% import "_macros.html" as macros %}
+
+    {% if current_user.can(Permission.WRITE_ARTICLES) %}
+    <div id="send" class="row">
+        <div class="row" id="postSay" >
+            <form method="post" action="/">
+                <div class="row">
+                    <div class="col-md-11"  style="margin-left: 16px;padding-right:25px;"  >
+
+                        {{ form.body( class="form-control",placeholder="文字限制在300个字数以内",style="resize:none;",autofocus="autofocus", rows=5 ,required="required") }}
+                        <div style="padding-top: 10px;float:right" >
+                            {{ form.submit(class="btn btn-info",style="padding-right: 20px;padding-left: 20px;float:right")}}
+                            <a style="padding-top: 20px;" ><span class="glyphicon glyphicon-camera pop-pick " style="font-size: 30px;margin-right: 20px;" ></span></a>
+                        </div>
+                        <p style="float: left;font-size: 13px;color: #87928a" id="wordsize">0/300</p>
+                        {{ form.cls }}
+                        {{ form.file_urls }}
+                        {{ form.csrf_token }}
+
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+                <div class="row" style="  ">
+
+                </div>
+            </form>
+            {#发表表单#}
+        </div>
+
+        {#文件上传#}
+        <div class="row" >
+            <div class="col-sm-10" >
+                <div id="uploader"  class="uploader" >
+                    <div class="queueList">
+                        <div id="dndArea" class="placeholder">
+                            <div id="filePicker"></div>
+                            <p>或将照片拖到这里，单次最多可选8张</p>
+                        </div>
+                    </div>
+                    <div class="statusBar" >
+                        <div class="progress">
+                            <span class="text">0%</span>
+                            <span class="percentage"></span>
+                        </div><div class="info"></div>
+                        <div class="btns">
+                            <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {#文件上传#}
+        </div>
+    </div>
+    {% endif %}
+
+
+
+
+
+
+    {#动态#}
+    <div id="post" class="row" >
+        <div class="post-tabs" >
+            <ul class="nav nav-tabs" style="margin-top: 20px;margin-bottom: 40px;">
+                <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">全部</a></li>
+                {% if current_user.is_authenticated %}
+                    <li{% if show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">关注</a></li>
+                {% endif %}
+            </ul>
+            {% include '_posts.html' %}
+        </div>
+        {#动态#}
+    </div>
+
+
+    {#分页部分#}
+    <div id="page" class="row">
+        <div class="pagination ">
+            {{ macros.pagination_widget(pagination, '.index') }}
+        </div>
+        {#分页部分#}
+        {#中间#}
+    </div>
+
+    {#主体#}
+

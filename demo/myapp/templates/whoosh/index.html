@@ -16,10 +16,12 @@
 </form>
 <script>
 $(document).ready(function(){
-  $("#search").bind('input onpropertychange',function(){
+  $("#search").bind('input onproperty',function(){
+      alert('ods');
       $.ajax({ url: "/whoosh", data:{'search':$("#search").val()},type:'post', dataType: 'json',
           success: function(data){
           if (data){
+              alert('ok');
               for (i in data ){
                   alert(i);
                alert(data[i]);

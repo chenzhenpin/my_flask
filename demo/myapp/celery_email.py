@@ -1,7 +1,7 @@
 from flask import current_app, render_template
 from flask_mail import Message
-from myapp.extension import mail
-from . import celery
+from myapp.extension import mail,celery
+#from . import celery
 
 @celery.task
 def sub():
@@ -19,3 +19,5 @@ def send_email(to, subject, template, **kwargs):
     msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template + '.html', **kwargs)
     send_async_email.delay(msg)
+
+

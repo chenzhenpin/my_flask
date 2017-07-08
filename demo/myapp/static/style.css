@@ -1,0 +1,24 @@
+
+#main{
+    margin-top: 20px;
+}
+
+.index_center{
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.posts{
+    margin-top: 20px;
+    padding-left:0px;
+    margin-bottom: 30px;
+
+}
+.posts-head p{
+    margin-bottom: 3px;
+}
+
+.post-head .posts-mian .post-footer{
+    clear: both;
+    margin-bottom: 20px;
+}

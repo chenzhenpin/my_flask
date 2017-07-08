@@ -1,156 +1,311 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% import "_macros.html" as macros %}
-
-{% block scripts %}
-{{ super() }}
-{{ pagedown.include_pagedown() }}
-
-    <link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/bootstrap-fileinput/4.4.0/css/fileinput.min.css">
-    <script type="text/javascript" src="https://cdn.bootcss.com/bootstrap-fileinput/4.4.0/js/fileinput.min.js"></script>
-    <script type="text/javascript" src="https://cdn.bootcss.com/bootstrap-fileinput/4.4.0/js/locales/zh.min.js"></script>
-
-
-    <script type="text/javascript">
-
-    var List = new Array()
-
-    $("#uploadfile").fileinput({
-                    language: 'zh', //设置语言
-                    uploadUrl: '{{ url_for('auth.uploadfile', _external=True) }}', //上传的地址
-                    allowedFileExtensions: ['jpg', 'gif', 'png'],//接收的文件后缀
-                    //uploadExtraData:{"id": 1, "fileName":'123.mp3'},
-                    uploadAsync: false, //默认异步上传
-                    showUpload: false, //是否显示上传按钮
-                    showRemove : false, //显示移除按钮
-                    showPreview : true, //是否显示预览
-                    showCaption: false,//是否显示标题
-                    browseClass: "btn btn-primary", //按钮样式
-                    dropZoneEnabled: true,//是否显示拖拽区域
-                    //minImageWidth: 50, //图片的最小宽度
-                    //minImageHeight: 50,//图片的最小高度
-                    //maxImageWidth: 50,//图片的最大宽度
-                    //maxImageHeight: 50,//图片的最大高度
-                    autoOrientImage:true,
-                    showBrowse:true,//显示选择文件按钮
-                    //browseOnZoneClick:true,//点击拖拽区域选择文件
-                    showUploadedThumbs:false,
-                    maxFileSize: 6 * 1024,//单位为kb，如果为0表示不限制文件大小
-                    //minFileCount: 0,
-                    maxFileCount: 9, //表示允许同时上传的最大文件个数
-                    enctype: 'multipart/form-data',
-                    validateInitialCount:true,
-                    resizePreference: 'height',
-                    //previewTemplates:{width:"10px",height:"150px"},
-                    //zoomModalHeight:"80px",//默认480px
-                    previewZoomSettings:{image: {width: "auto", height: "auto", 'max-width': "50%",'max-height': "50%"}},//设置预览图片大小
-                    previewSettings:{image: {width: "200px", height: "200px"}},
-                    previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
-                    msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
-                });
-
-    //异步上传错误返回结果处理
-    $('#uploadfile').on('fileerror', function(event, data, msg) {
-                console.log(data.id);
-                console.log(data.index);
-                console.log(data.file);
-                console.log(data.reader);
-                console.log(data.files);
-                // get message
-                alert(msg);
-    });
-    //异步上传成功返回结果处理
-    $("#uploadfile").on("fileuploaded", function (event, data, previewId, index) {
-                   console.log(previewId);
-                   console.log(index);
-                    console.log(index);
-                    console.log(data.id);
-                    var obj = data.response;
-                    List.push({ FileName: data.response.path, KeyID: previewId })
-                    //alert(JSON.stringify(List));
-                });
-
-    //同步上传错误处理
-           $('#uploadfile').on('filebatchuploaderror', function(event, data, msg) {
-                console.log(data.id);
-                console.log(data.index);
-                console.log(data.file);
-                console.log(data.reader);
-                console.log(data.files);
-                // get message
-                alert(msg);
-             });
-       //同步上传返回结果处理
-       $("#uploadfile").on("filebatchuploadsuccess", function (event, data, previewId, index) {
-               console.log(data.id);
-                   console.log(data.index);
-                   console.log(data.file);
-                   console.log(data.reader);
-                   console.log(data.files);
-                    var obj = data.response;
-                    alert(JSON.stringify(data.success));
-          });
-
-    //上传前
-    $('#uploadfile').on('filepreupload', function(event, data, previewId, index) {
-            var form = data.form, files = data.files, extra = data.extra,
-                response = data.response, reader = data.reader;
-            console.log('File pre upload triggered');
-        });
-
-    //点击浏览框右上角X 清空文件前响应事件
-
-    $("#uploadfile").on("fileclear",function(event, data, msg){
-            alert("fileclear");
-        });
-    //图片上传成功后，点击删除按钮的回调函数
-    $("#uploadfile").on("fileremoved", function (event, data, previewId, index) {
-        for (var i = 0; i < List.length; i++) {
-            if (List[i].KeyID== data) {
-            delete List[i];
-            alert(JSON.stringify(List));
-            }
-        }
-    });
-
-    //$('.file-preview-thumbnails').parent().css('width','100%');
-    //$('.krajee-default.file-preview-frame .file-thumbnail-footer').hide();
-    </script>
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 {% endblock %}
-{% block title %}Flasky - Page Not Found{% endblock %}
+
+
+
+
+{% block title %}椰壳-首页{% endblock %}
 
 {% block page_content %}
-    <div class="page-header">
-        <h1>Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
-        {% if not known %}
-        <p>Pleased to meet you!</p>
-        {% else %}
-        <p>Happy to see you again!</p>
-        {% endif %}
+    <div class="content" style="margin-right: 1%;margin-left: 1%;">
+
+
+
+
+        <div class="row" id="index_head" style="background-color: #00a2d4">
+
+            {% include 'index_head.html' %}
+        </div>
+
+
+
+
+        <div class="row" id="main">
+            {# 左侧#}
+            <div id="index_left" class="col-md-3 col-sm-3 hidden-xs">
+                {% include 'index_left.html' %}
+            </div>
+
+            {#中间#}
+            <div id="index_center" class="col-md-6 col-sm-6" style="padding-left: 25px;padding-right: 25px">
+                {% include 'index_center.html' %}
+            </div>
+
+            {#右侧#}
+            <div id="index_right" class="col-md-3 col-sm-3 hidden-xs" style="background-color: #1b6d85">
+                {% include 'index_right.html' %}
+            </div>
+
+        </div>
+
+
+
+
+        <div class="row" id="index_footer" style="background-color: #00cc66">
+            {% include 'index_footer.html' %}
+        </div>
+
+
+
+
     </div>
-    <div>
-        {% if current_user.can(Permission.WRITE_ARTICLES) %}
-        {{ wtf.quick_form(form) }}
-        {% endif %}
-    </div>
-    <div>
-<label class="control-label">Select File</label>
-<input type="file" name="uploadfile" id="uploadfile" multiple class="file-loading" />
-</div>
-  <div class="post-tabs">
-    <ul class="nav nav-tabs">
-        <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">All</a></li>
-        {% if current_user.is_authenticated %}
-        <li{% if show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">Followers</a></li>
-        {% endif %}
-    </ul>
-    {% include '_posts.html' %}
-    </div>
-    <div class="pagination ">
-        {{ macros.pagination_widget(pagination, '.index') }}
-    </div>
+
+
+
+
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    {{ pagedown.include_pagedown() }}
 
+    {% if current_user.is_authenticated %}
+
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/style.css') }}">
+        <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.js')}}"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/upload.js')}}"></script>
+        <script type="text/javascript">
+            $('.pop-pick').popover(
+                {   html:true,
+                    placement:"bottom",
+                    content:'<a  href="javascript:void(0);" id="popimage" onclick="pop_image()"><label  style="width: 50px;height: 50px;margin-bottom:-20px" >' +
+                    '<span class="glyphicon glyphicon-picture"></span><span style="margin-left: 2px">照片</span></label></a>' +
+                    '<hr style="margin-bottom: 0px;margin-top: 0px">' +
+                    '<a  href="javascript:void(0);" class="popvideo" onclick="pop_video()"  ><label style="margin-top: 8px"><span class="glyphicon glyphicon-film"></span><span style="margin-left: 2px">视频<sapn></label></a>',
+                    trigger:'click',
+
+                }
+            );
+            {#隐藏文件上传区域#}
+            $("#uploader").removeAttr("class");
+            $("#uploader").attr("class","webuploader-element-invisible");
+            function pop_image() {
+                {#设置表单的文件类型#}
+                $('#cls').val('1');
+                fileSum=8;//文件个数
+                fileSizeOne=10 * 1024 * 1024;//单个文件大小
+                flieSizeSum=80 * 1024 * 1024;//总文件大小
+                file_extensions ='gif,jpg,jpeg,bmp,png';
+                file_title='Images';
+                file_type='image/*';
+                uploader.reset();
+                uploader.destroy();
+                create();
+                {#这段代码应该在设置参数的前面#}
+                $('.pop-pick').popover('hide');
+                $("#uploader").removeAttr("class");
+                $("#uploader").attr("class", "webuploader-container");
+                $("#filePicker > div.webuploader-pick").css('background','#00cc66');
+                uploader.option( 'fileNumLimit',fileSum );
+                uploader.option( 'fileSingleSizeLimit',fileSizeOne );
+                uploader.option( 'fileSizeLimit',flieSizeSum );
+                uploader.option( 'accept ', {
+                    title : file_title,
+                    extensions : file_extensions,
+                    mimeTypes :file_type
+                });
+
+
+            };
+
+            function pop_video(){
+                {#设置表单的文件类型#}
+                $('#cls').val('2');
+                fileSum=1;//文件个数
+                fileSizeOne=80 * 1024 * 1024;//单个文件大小
+                flieSizeSum=80 * 1024 * 1024;//总文件大小
+                file_extensions ='mp4,swf,avi,mov';
+                file_title='Videos';
+                file_type='video/*';
+                uploader.reset();
+                uploader.destroy();
+                create();
+                {#这段代码应该在设置参数的前面#}
+                $('.pop-pick').popover('hide');
+                $("#uploader").removeAttr("class");
+                $("#uploader").attr("class", "webuploader-container");
+                $("#dndArea > p").html("或将视频拖到这里，单次最多上传一个视频");
+                $("#filePicker > div.webuploader-pick").css('background','#8fc13e')
+                window.uploader.option( 'fileNumLimit',fileSum );
+                window.uploader.option( 'fileSingleSizeLimit',fileSizeOne );
+                window.uploader.option( 'fileSizeLimit',flieSizeSum );
+                window.uploader.option( 'accept ', {
+                    title : file_title,
+                    extensions : file_extensions,
+                    mimeTypes :file_type
+                });
+
+            };
+        </script>
+
+    {% endif %}
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/img_viewer/viewer.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='pro/img_viewer/viewer.js')}}"></script>
+    {#    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.min.js') }}"></script>#}
+    <script type="text/javascript">
+        $('.images').viewer();
+
+        {#   $("#btn-postSay").click(function () {
+               $("#btn-postSay").hide();
+               $("#postSay").show();
+           });#}
+
+
+        {#点赞#}
+        function heart(id,count) {
+            {% if current_user.is_authenticated %}
+                $.post( "/heart/"+id,function (data,status) {
+
+                        if (data=='1'){
+
+                            {#点赞#}
+                            if ($('#heartshow{{ current_user.id }}'+id).css('display')=='none'){
+                                $('#heartshowm{{ current_user.id }}'+id).show();
+                                $('#heartshow{{ current_user.id }}'+id).show();
+                            }else {
+                                if($('#'+id).text()=='0'){
+                                    var text=$('.hearts'+id).html();
+                                    text=text+'<a id="heartshow{{ current_user.id }}'+id+'"'+'href="{{ url_for('.user', username=current_user.username) }}" style="float: left">{{current_user.username}}</a>';
+                                    $('.hearts'+id).html(text);
+                                }
+                                else {
+                                    var text=$('.hearts'+id).html();
+                                    text=text+'<span style="float: left" id="heartshowm{{ current_user.id }}'+id+'"'+'>、</span><a id="heartshow{{ current_user.id }}'+id+'"'+' href="{{ url_for('.user', username=current_user.username) }}" style="float: left">{{current_user.username}}</a>';
+                                    $('.hearts'+id).html(text);
+                                }
+                            }
+
+                            {#改变点赞数字显示#}
+                            if($('#'+id).text()==count){
+                                count=count+1;
+                                $('#'+id).text(count);
+
+                            }else {
+                                $('#'+id).text(count);
+                            }
+
+                            {#显示点赞心图标#}
+                            $('#glyphicon-heart'+id).show();
+                            {#改变点赞手拇指图标颜色#}
+                            $('#up-glyphicon'+id).css('color','#00a2d4');
+
+
+                        }else {
+
+                            {#取消点赞#}
+                            {#隐藏该取消点赞的人#}
+                            $('#heartshowm{{ current_user.id }}'+id).hide();
+                            $('#heartshow{{ current_user.id }}'+id).hide();
+                            {#改变点赞数字显示#}
+                            if($('#'+id).text()==count){
+                                count=count-1;
+                                $('#'+id).text(count);
+                            }else {
+                                $('#'+id).text(count);
+                            }
+                            {#隐藏点赞心图标#}
+                            if($('#'+id).text()=='0'){
+                                $('#glyphicon-heart'+id).hide();
+                            };
+
+                            {#改变点赞手拇指图标颜色#}
+                            $('#up-glyphicon'+id).css('color','#5f6d64');
+                        }
+
+                    }
+
+                );
+
+            {% else %}
+                alert("请先登录");
+            {% endif %}
+
+
+
+        }
+
+
+        {% if current_user.is_authenticated %}
+
+
+            $('#body').bind('input propertychange',function () {
+                if($('#body').val().length>=300){
+                    $('#body').attr('disabled',true)
+                }
+                $('#wordsize').text($('#body').val().length+'/'+'300');
+            });
+
+
+            {#发表评论id为文章id,by_user_id为被评论者的用户id,username为被评论者的username#}
+            function pinglun(id){
+
+                var by_user_id=$('#by-user-id'+id).val();
+                var username=$('#username'+id).val();
+                if ($('#pinglun'+id).val()){
+                    $.post( "/post/"+id,{'by_user_id':by_user_id,'body':$('#pinglun'+id).val()},function (data,status){
+                        var text='';
+                        text=$('.ping-show'+id).html();
+                        if({{ current_user.id }}==by_user_id){
+
+                            text=text+'<p><a href="{{ url_for('.user', username=current_user.username) }}">{{ current_user.username}}</a>:'+$('#pinglun'+id).val()+'</p>';
+                        }else {
+                            text=text+'<p><a href="{{ url_for('.user', username=current_user.username) }}">{{ current_user.username}}</a> 回复'+
+                                '<a href="{{ url_for('.user', username=username) }}">'+username+'</a>:'+$('#pinglun'+id).val()
+                                +'</p>';
+                        }
+                        $('.ping-show'+id).html(text);
+                        $('#pinglun'+id).val('');
+                        $('#pinglun'+id).attr('placeholder','');
+                    });
+                }else {
+                    alert('评论不能为空');
+                }
+
+
+            };
+
+
+            {#鼠标移动到评论信息条目事件#}
+            function pingover(id){
+                $('.ping-content'+id).css('background-color','#eef0f4');
+            };
+            {#鼠标移出到评论信息条目事件#}
+            function pingout(id){
+                $('.ping-content'+id).css('background-color','white');
+            };
+            {#点击回复某人#}
+            function jumpping(id,by_user_id,username) {
+
+                $('#pinglun'+id).attr('placeholder','回复'+username);
+                $('#pinglun'+id).focus();
+                $('#by-user-id'+id).val(by_user_id);
+                $('#username'+id).val(username);
+
+            }
+        {% endif %}
+
+
+        {#点击编辑按钮#}
+        function editping(id,author_id,author_name) {
+            {% if current_user.is_authenticated %}
+                $('#pinglun'+id).attr('placeholder','回复'+author_name);
+                $('#pinglun'+id).focus();
+                $('#by-user-id'+id).val(author_id);
+                $('#username'+id).val(author_name);
+            {% else %}
+                alert("请先登录");
+            {% endif %}
+        }
+
+    </script>
+
+{% endblock %}
 
 

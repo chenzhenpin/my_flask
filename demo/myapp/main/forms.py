@@ -49,6 +49,15 @@ class PostForm(Form):
     body = TextAreaField( '',validators=[Required()])
     submit = SubmitField('发送')
 
-class CommentForm(Form):
-    body = StringField('', validators=[Required()])
-    submit = SubmitField('Submit')
+class EditArticleForm(Form):
+    body = TextAreaField('body', validators=[Required()])
+    title = StringField('标题', validators=[Required(), Length(1, 64)])
+    file=FileField('附件',validators=[FileAllowed(['zip','pdf','doc','docx','xlsx','xls','txt'])])
+    submit = SubmitField('发表')
+
+class SearchArticleForm(Form):
+    keyword=StringField('',validators=[Required()])
+    submit=SubmitField('搜索')
+# class CommentForm(Form):
+#     body = StringField('', validators=[Required()])
+#     submit = SubmitField('Submit')

@@ -1,166 +1,139 @@
-{#    <ul class="posts">
-        {% for post in posts %}
-        <li class="post">
-            <div class="profile-thumbnail" style="float: left;">
-                <a href="{{ url_for('.user', username=post.author.username) }}">
-                    <img class="img-circle"src="{{ url_for('main.img',username=post.author.username) }} "
-                    style=" width: 50px;height: 50px;">
-                </a>
-            </div>
-            <div class="post-content" >
-                <div class="post-date">{{ moment(post.timestamp).fromNow() }}</div>
-                <div class="post-author" >
-                    {{ post.author.username }}
-                </div>
-                <div class="post-body" >
-                    {% if post.body_html %}
-                    {{ post.body_html | safe }}
-                    {% else %}
-                    {{ post.body }}
-                    {% endif %}
-                </div>
-                <div class="post-footer">
-                    {% if current_user == post.author %}
-                    <a href="{{ url_for('.edit', id=post.id) }}">
-                        <span class="label label-primary">Edit</span>
-                     </a>
-                    {% elif current_user.is_administrator() %}
-                    <a href="{{ url_for('.edit', id=post.id) }}">
-                        <span class="label label-danger">Edit [Admin]</span>
-                    </a>
-                    {% endif %}
-                    <a href="{{ url_for('.post', id=post.id) }}">
-                        <span class="label label-default">Permalink</span>
-                    </a>
-                    <a href="{{ url_for('.post', id=post.id) }}#comments">
-                        <span class="label label-primary">
-                        {{ post.comments.count() }} Comments
-                        </span>
-                    </a>
-                </div>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>#}
 
 
-<ul class="posts" style="margin-top: 20px;">
+<ul class="posts" style="padding-left: 0px">
     {% for post in posts %}
-    <div class="post-content container-fluid" >
-
-        <div class="row">
-            <div style="float: left">
-                <a href="{{ url_for('.user', username=post.author.username) }}" >
-                    <img class="media-object img-circle " src="{{ url_for('main.img',username=post.author.username)}}" alt="..." style=" width:40px;height: 40px;">
-                </a>
+            <div class="row-fluid post-head" style="margin-top: 70px;">
+                <div style="float: left">
+                    <a href="{{ url_for('.user', username=post.author.username) }}" >
+                        <img class="media-object img-circle " src="{{ url_for('static',filename=current_user.img )}}" alt="..." style=" width:40px;height: 40px;">
+                    </a>
+                </div>
+                <div style="float: left;margin-left: 2%;margin-bottom: 10px">
+                    <p style="font-size: 16px;margin-bottom: 3px" >{{ post.author.username }}</p>
+                    <p style="font-size: 13px;color: #87928a; margin-bottom: 3px">{{ moment(post.timestamp).fromNow(refresh=True) }}</p>
+                </div>
             </div>
-            <div style="float: left;margin-left: 2%">
-                <p style="font-size: 16px;">{{ post.author.username }}</p>
-                <p style="font-size: 13px;color: #87928a;margin-top: 5px">{{ moment(post.timestamp).fromNow() }}</p>
-            </div>
-        </div>
 
 
-            <div class="row">
 
-                <div class="user-mssage" style="font-size: 14px;color: #3c3836;margin-bottom: 10px;margin-top: 15px">
+
+            <div class="row-fluid post-mian" style="clear: both">
+
+                <div class="post-body-head" style="font-size: 14px;color: #3c3836;adding-top: 5px">
                     {% if post.body_html %}
                         <p>{{ post.body_html | safe }}</p>
                     {% else %}
                         <p>{{ post.body }}</p>
                     {% endif %}
-                </div>
-                <div class="media">
-                {% if post.cls==1%}
 
-                    <div style="margin-top: 10px;margin-bottom: 10px">
-                      <ul class="images" >
-                           {% for file_url in post.file_urls.split(';') %}
-                            <div> <img src="{{ url_for('static',filename=post.file_urls) }}" alt="" style="height:auto;width:25% ;float: left;margin: 2px" ></div>
-                            {% endfor %}
-                      </ul>
-                    </div>
-                {% elif post.cls==2%}
-                     <div >
-                         {#<video id="example_video_1" class="video-js vjs-default-skin vjs-big-play-centered"
+
+
+                <div class="post-body-media" style="clear: both">
+                    {% if post.cls==1%}
+
+                        <div style="margin-top: 10px;margin-bottom: 10px" class="images">
+
+                                {% for file_url in post.file_urls.split(';') %}
+                                     <img src="{{ url_for('static',filename=file_url )}}" alt="" style="height:auto;width:49% ;float: left;margin: 2px; " >
+                                {% endfor %}
+
+                        </div>
+                    {% elif post.cls==2%}
+                        <div >
+                            {#<video id="example_video_1" class="video-js vjs-default-skin vjs-big-play-centered"
                                 controls preload="auto"
                                 data-setup='{"example_option":true}' height=auto width=100% >
                              <source src="{{post.file_urls}}"  />
                              <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
                          </video>#}
-                          <video  height=auto width=100% controls preload="auto" >
-{#                             <source src="{{post.file_urls}}"  />#}
-                             <source src="{{ url_for('static',filename=post.file_urls) }}" />
-                             <p>To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
-                         </video>
-                    </div>
-                {% endif %}
+                            <video  height=auto width=100% controls preload="auto" style="margin-bottom: 10px;margin-top: 10px" >
+                                {#                             <source src="{{post.file_urls}}"  />#}
+                                <source src="{{ url_for('static',filename=post.file_urls) }}" />
+                                <p>To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
+                            </video>
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="post-footer" style="margin-top: 10px;float: right;margin-bottom: 5px">
-{#                    {% if current_user == post.author %}#}
-{#                        <a href="{{ url_for('.edit', id=post.id) }}">#}
-{#                            <span class="label label-primary">Edit</span>#}
-{#                        </a>#}
-{#                    {% elif current_user.is_administrator() %}#}
-{#                        <a href="{{ url_for('.edit', id=post.id) }}">#}
-{#                            <span class="label label-danger">Edit [Admin]</span>#}
-{#                        </a>#}
-{#                    {% endif %}#}
-                     <a href="{{ url_for('.post', id=post.id) }}" style="text-decoration:none">
-                        <label style="color: #5f6d64;padding-left: 8px;font-size: 15px">
+
+
+
+
+                <div class="post-body-footer" style="margin-top: 10px;float: right;margin-bottom: 5px;clear: both">
+                    {#                    {% if current_user == post.author %}#}
+                    {#                        <a href="{{ url_for('.edit', id=post.id) }}">#}
+                    {#                            <span class="label label-primary">Edit</span>#}
+                    {#                        </a>#}
+                    {#                    {% elif current_user.is_administrator() %}#}
+                    {#                        <a href="{{ url_for('.edit', id=post.id) }}">#}
+                    {#                            <span class="label label-danger">Edit [Admin]</span>#}
+                    {#                        </a>#}
+                    {#                    {% endif %}#}
+                    <a href="{{ url_for('.post', id=post.id) }}" style="text-decoration:none">
+                        <label style="color: #87928a;padding-left: 8px;font-size: 15px">
                             <span class="glyphicon glyphicon-eye-open"></span>
-                            <span>{{ post.comments.count()}}</span>
+                            <span>{{ post.views}}</span>
+                            <span style="display: none">{{ post.add_views }}</span>
                         </label>
                     </a>
 
                     <a onclick="heart({{post.id}},{{ post.hearts.count()}})" style="text-decoration:none">
-                        <label style="color: #5f6d64;padding-left: 8px;font-size: 15px">
+                        <label style="color: #87928a;padding-left: 8px;font-size: 15px;{% for user in post.hearts_user %}
+                            {% if user.id==current_user.id %}
+                                color:#00a2d4 ;
+                            {% endif %}
+                        {% endfor %}
+                                " id="up-glyphicon{{ post.id }}">
                             <span class="glyphicon glyphicon-thumbs-up"></span>
                             <span id="{{post.id}}">{{ post.hearts.count()}}</span>
                         </label>
                     </a>
-                    {#<a href="{{ url_for('.post', id=post.id) }}#comments" style="text-decoration:none">
-                        <label style="color: #5f6d64;padding: 8px;font-size: 15px">
-                            <span class="glyphicon glyphicon-edit " ></span>
-                            <span>{{ post.comments.count()}}</span>
-                        </label>
-                    </a>#}
+
                     <a onclick="editping({{ post.id }},{{ post.author_id }},'{{ post.author.username }}')" style="text-decoration:none">
-                        <label style="color: #5f6d64;padding: 8px;font-size: 15px">
-                            <span class="glyphicon glyphicon-edit " ></span>
+                        <label style="color: #87928a;padding: 8px;font-size: 15px">
+                            <span class="glyphicon glyphicon-comment" ></span>
                             <span>{{ post.comments.count()}}</span>
                         </label>
                     </a>
+                    {#<a href="{{ url_for('.post', id=post.id) }}#comments" style="text-decoration:none">
+                        <label style="color: #5f6d64;padding: 8px;font-size: 15px">
+                            <span class="glyphicon glyphicon-list " ></span>
+                            <span>详情</span>
+                        </label>
+                    </a>#}
                 </div>
-                <div class="post-footer-message" style="clear: both;margin-bottom: 50px;margin-left: 10px;">
-                    {% if post.hearts_username%}
+
+
+
+
+                <div class="row post-footer-message" style="clear: both;margin-bottom: 50px;margin-left: 20px; margin-bottom: 10px">
+                    <hr style="color: #5f6d64;clear: both;">
+                    <span class="glyphicon glyphicon-heart" id="glyphicon-heart{{ post.id }}" style="margin-right: 3px;float: left;color: #00a2d4;display:{% if post.hearts.count()!=0%}block{% else %}none{% endif %} "></span>
+                    {% if post.hearts.count()!='0'%}
                         <div style="padding-bottom: 10px;font-size: small;color: #00a2d4;">
-                        <span class="glyphicon glyphicon-heart" style="margin-right: 3px;float: left"></span>
-                        {% for username in post.hearts_username %}
-                            {% if loop.first %}
-                            <a href="{{ url_for('.user', username=username) }}" style="float: left">{{username}}</a>
-                            {% else %}
-                                <span style="float: left">、</span><a href="{{ url_for('.user', username=username) }}" style="float: left">{{username}}</a>
-                            {% endif %}
-                        {% endfor %}
+                            <p class="hearts{{ post.id }}">
+                                {% for user in post.hearts_user %}
+                                    {% if loop.first %}
+                                        <a id="heartshow{{ user.id }}{{ post.id }}" href="{{ url_for('.user', username=user.username) }}" style="float: left;display: block">{{user.username}}</a>
+                                    {% else %}
+                                        <span style="float: left;display: block" id="heartshowm{{ user.id }}{{ post.id }}">、</span><span id="heartshow{{ user.id }}{{ post.id }}"><a  href="{{ url_for('.user', username=user.username) }}" style="float: left;display: block">{{user.username}}</a></span>
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
                         </div>
                     {% endif %}
-                    <hr style="color: #5f6d64;clear: both;">
 
-{#                            {% for name in  listname.s %}#}
-{#                        {% for user in post.hearts_user %}#}
-{#                        {% if loop.first %}<a href="{{ url_for('.user', username=user.username) }}" style="float: left">{{ user.username}}</a>#}
-{#                        {% elif loop.last %}#}
-{##}
-{#                           、<a href="{{ url_for('.user', username=user.username) }}" style="float: left">{{ user.username}}</a>#}
-{#                        {% endif %}#}
-{#                    {% endfor %}#}
+
+
+
                     {% if post.comments %}
 
-                    <div class="ping-show{{ post.id }}" style="clear: both;font-size: 13px;">
+                        <div class="ping-show{{ post.id }}" style="clear: both;font-size: 13px;margin-top: 20px">
                             {% for comment in post.comments  %}
-                                <a href="JavaScript:void(0)" >
-                                    <p class="ping-content{{ comment.id }}" onmouseover="pingover({{ comment.id }})" onmouseout="pingout({{ comment.id }})"  onclick="jumpping({{ post.id }},{{ comment.author_id }},'{{ comment.author.username }}')">
+                                <p class="ping-content{{ comment.id }}" style="margin-bottom: 0px"
+                                   onmouseover="pingover({{ comment.id }})"
+                                   onmouseout="pingout({{ comment.id }})"
+                                   onclick="jumpping({{ post.id }},{{ comment.author_id }},'{{ comment.author.username }}')">
+
                                     <a href="{{ url_for('.user', username=comment.author.username) }}">{{ comment.author.username }}</a>
                                     {% if comment.author.username  == comment.by_user.username %}
                                         :{{ comment.body }}
@@ -168,24 +141,24 @@
                                         回复<a href="{{ url_for('.user', username=comment.by_user.username) }}">{{ comment.by_user.username }}:</a>{{ comment.body }}
                                     {% endif %}
                                 </p>
-                                </a>
-
                             {% endfor %}
-                    </div>
+                        </div>
                     {% endif %}
-                    <div class="input-group" style="clear: both;padding-top: 20px">
-                        <input type="text" class="form-control" id="pinglun{{ post.id }}" placeholder="">
-                        <input type="hidden" id="by-user-id{{ post.id  }}" value="{{ post.author_id}}">
-                        <input type="hidden" id="username{{ post.id  }}" value="{{ post.author.username }}">
-                        <span class="input-group-btn">
+                    {% if current_user.is_authenticated %}
+                        <div class="input-group" style="clear: both;padding-top: 20px">
+                            <input type="text" class="form-control" id="pinglun{{ post.id }}" placeholder="">
+                            <input type="hidden" id="by-user-id{{ post.id  }}" value="{{ post.author_id}}">
+                            <input type="hidden" id="username{{ post.id  }}" value="{{ post.author.username }}">
+                            <span class="input-group-btn">
                             <button class="btn btn-warning" type="button" onclick="pinglun({{ post.id }})">评论</button>
                         </span>
-                    </div><!-- /input-group -->
+                        </div><!-- /input-group -->
+                    {% endif%}
 
                 </div>
 
             </div>
-    </div>
+        </div>
     {% endfor %}
 </ul>
 

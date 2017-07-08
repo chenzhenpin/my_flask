@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% import "_macros.html" as macros %}
 
 
 
 
-{% block title %}Flasky - Page Not Found{% endblock %}
+
+{% block title %}椰壳-首页{% endblock %}
 
 {% block page_content %}
     <div class="content" style="margin-right: 1%;margin-left: 1%;">
         {# 页头#}
-        <div class="row header" style="height:90px;background-image:url('{{ url_for('static', filename='back.png')}}');margin-bottom: 20px;padding-top: -15px ">
+        <div class="row header" style="height:90px;background-image:url('{{ url_for('static', filename='img/back.png')}}');margin-bottom: 20px;padding-top: -15px ">
             <h2 style="font-size: 25px;color: #8b8792;padding-left: 5%;padding-top: 30px">很幸运能在最美的青春遇见你!</h2>
         </div>
 
@@ -36,11 +36,13 @@
                             <form method="post" action="/">
                                 <div class="row">
                                     <div class="col-md-11"  style="margin-left: 16px;padding-right:25px;"  >
-                                        {{ form.body(class="form-control",placeholder="文字限制在300个字数以内",style="resize:none;",autofocus="autofocus",required="required") }}
-                                        <div style= "position:relative;top: -17px;float: right">
-                                            <a><span class="glyphicon glyphicon-camera pop-pick" style="padding-right:2px"></span></a>
+
+                                        {{ form.body( class="form-control",placeholder="文字限制在300个字数以内",style="resize:none;",autofocus="autofocus",required="required") }}
+                                        <div style="padding-top: 10px;float:right" >
+                                        {{ form.submit(class="btn btn-info",style="padding-right: 20px;padding-left: 20px;float:right")}}
+                                        <a style="padding-top: 20px;" ><span class="glyphicon glyphicon-camera pop-pick " style="font-size: 30px;margin-right: 20px;" ></span></a>
                                         </div>
-                                        {{ form.submit(class="btn btn-info",style="clear: both;float: right;padding-right: 20px;padding-left: 20px") }}
+                                        <p style="float: left;font-size: 13px;color: #87928a" id="wordsize">0/300</p>
                                         {{ form.cls }}
                                         {{ form.file_urls }}
                                         {{ form.csrf_token }}
@@ -125,23 +127,15 @@
 {% block scripts %}
     {{ super() }}
     {{ pagedown.include_pagedown() }}
-    {#    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
-    <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.min.js') }}"></script>#}
+
+    {% if current_user.is_authenticated %}
+
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/img_viewer/viewer.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.js')}}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='pro/img_viewer/viewer.js')}}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/upload.js')}}"></script>
     <script type="text/javascript">
-        $('.images').viewer();
-
-        {#   $("#btn-postSay").click(function () {
-               $("#btn-postSay").hide();
-               $("#postSay").show();
-           });#}
-
-        $('.pop-pick').popover(
+     $('.pop-pick').popover(
             {   html:true,
                 placement:"bottom",
                 content:'<a  href="javascript:void(0);" id="popimage" onclick="pop_image()"><label  style="width: 50px;height: 50px;margin-bottom:-20px" >' +
@@ -212,89 +206,168 @@
             });
 
         };
+    </script>
+
+    {% endif %}
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/img_viewer/viewer.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='pro/img_viewer/viewer.js')}}"></script>
+    {#    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.min.js') }}"></script>#}
+    <script type="text/javascript">
+        $('.images').viewer();
+
+        {#   $("#btn-postSay").click(function () {
+               $("#btn-postSay").hide();
+               $("#postSay").show();
+           });#}
+
+
         {#点赞#}
         function heart(id,count) {
-
-            $.post( "/heart/"+id,function (data,status) {
+            {% if current_user.is_authenticated %}
+                $.post( "/heart/"+id,function (data,status) {
 
                     if (data=='1'){
+
                         {#点赞#}
+                        if ($('#heartshow{{ current_user.id }}'+id).css('display')=='none'){
+                            $('#heartshowm{{ current_user.id }}'+id).show();
+                            $('#heartshow{{ current_user.id }}'+id).show();
+                        }else {
+                            if($('#'+id).text()=='0'){
+                                var text=$('.hearts'+id).html();
+                                text=text+'<a id="heartshow{{ current_user.id }}'+id+'"'+'href="{{ url_for('.user', username=current_user.username) }}" style="float: left">{{current_user.username}}</a>';
+                                $('.hearts'+id).html(text);
+                            }
+                            else {
+                                var text=$('.hearts'+id).html();
+                                text=text+'<span style="float: left" id="heartshowm{{ current_user.id }}'+id+'"'+'>、</span><a id="heartshow{{ current_user.id }}'+id+'"'+' href="{{ url_for('.user', username=current_user.username) }}" style="float: left">{{current_user.username}}</a>';
+                                $('.hearts'+id).html(text);
+                            }
+                        }
+
+                        {#改变点赞数字显示#}
                         if($('#'+id).text()==count){
                             count=count+1;
                             $('#'+id).text(count);
+
                         }else {
                             $('#'+id).text(count);
                         }
 
+                        {#显示点赞心图标#}
+                        $('#glyphicon-heart'+id).show();
+                        {#改变点赞手拇指图标颜色#}
+                        $('#up-glyphicon'+id).css('color','#00a2d4');
+
+
                     }else {
+
                         {#取消点赞#}
+                        {#隐藏该取消点赞的人#}
+                        $('#heartshowm{{ current_user.id }}'+id).hide();
+                        $('#heartshow{{ current_user.id }}'+id).hide();
+                        {#改变点赞数字显示#}
                         if($('#'+id).text()==count){
                             count=count-1;
                             $('#'+id).text(count);
                         }else {
                             $('#'+id).text(count);
                         }
+                        {#隐藏点赞心图标#}
+                        if($('#'+id).text()=='0'){
+                            $('#glyphicon-heart'+id).hide();
+                        };
 
+                        {#改变点赞手拇指图标颜色#}
+                        $('#up-glyphicon'+id).css('color','#5f6d64');
                     }
 
                 }
 
             );
 
+            {% else %}
+                alert("请先登录");
+            {% endif %}
+
+
+
         }
 
 
-    {#发表评论id为文章id,by_user_id为被评论者的用户id,username为被评论者的username#}
-    function pinglun(id){
+         {% if current_user.is_authenticated %}
 
-        var by_user_id=$('#by-user-id'+id).val();
-        var username=$('#username'+id).val();
-        if ($('#pinglun'+id).val()){
-            $.post( "/post/"+id,{'by_user_id':by_user_id,'body':$('#pinglun'+id).val()},function (data,status){
-                var text='';
-                text=$('.ping-show'+id).html();
-                if({{ current_user.id }}==by_user_id){
+
+        $('#body').bind('input propertychange',function () {
+            if($('#body').val().length>=300){
+                $('#body').attr('disabled',true)
+            }
+           $('#wordsize').text($('#body').val().length+'/'+'300');
+        });
+
+
+        {#发表评论id为文章id,by_user_id为被评论者的用户id,username为被评论者的username#}
+        function pinglun(id){
+
+            var by_user_id=$('#by-user-id'+id).val();
+            var username=$('#username'+id).val();
+            if ($('#pinglun'+id).val()){
+                $.post( "/post/"+id,{'by_user_id':by_user_id,'body':$('#pinglun'+id).val()},function (data,status){
+                    var text='';
+                    text=$('.ping-show'+id).html();
+                    if({{ current_user.id }}==by_user_id){
 
                         text=text+'<p><a href="{{ url_for('.user', username=current_user.username) }}">{{ current_user.username}}</a>:'+$('#pinglun'+id).val()+'</p>';
-                }else {
+                    }else {
                         text=text+'<p><a href="{{ url_for('.user', username=current_user.username) }}">{{ current_user.username}}</a> 回复'+
-                                  '<a href="{{ url_for('.user', username=username) }}">'+username+'</a>:'+$('#pinglun'+id).val()
-                             +'</p>';
-                }
-                $('.ping-show'+id).html(text);
-                $('#pinglun'+id).val('');
-                $('#pinglun'+id).attr('placeholder','');
-            });
-        }else {
-            alert('评论不能为空');
+                            '<a href="{{ url_for('.user', username=username) }}">'+username+'</a>:'+$('#pinglun'+id).val()
+                            +'</p>';
+                    }
+                    $('.ping-show'+id).html(text);
+                    $('#pinglun'+id).val('');
+                    $('#pinglun'+id).attr('placeholder','');
+                });
+            }else {
+                alert('评论不能为空');
+            }
+
+
+        };
+
+
+        {#鼠标移动到评论信息条目事件#}
+        function pingover(id){
+            $('.ping-content'+id).css('background-color','#eef0f4');
+        };
+        {#鼠标移出到评论信息条目事件#}
+        function pingout(id){
+            $('.ping-content'+id).css('background-color','white');
+        };
+        {#点击回复某人#}
+        function jumpping(id,by_user_id,username) {
+
+            $('#pinglun'+id).attr('placeholder','回复'+username);
+            $('#pinglun'+id).focus();
+            $('#by-user-id'+id).val(by_user_id);
+            $('#username'+id).val(username);
+
         }
+        {% endif %}
 
-    };
 
-    {#鼠标移动到评论信息条目事件#}
-    function pingover(id){
-       $('.ping-content'+id).css('background-color','#c6c5fe');
-    };
-    {#鼠标移除到评论信息条目事件#}
-    function pingout(id){
-       $('.ping-content'+id).css('background-color','white');
-    };
-    {#点击回复某人#}
-    function jumpping(id,by_user_id,username) {
-
-       $('#pinglun'+id).attr('placeholder','回复'+username);
-       $('#pinglun'+id).focus();
-       $('#by-user-id'+id).val(by_user_id);
-       $('#username'+id).val(username);
-
-    }
-    {#点击编辑按钮#}
-    function editping(id,author_id,author_name) {
-        $('#pinglun'+id).attr('placeholder','回复'+author_name);
-        $('#pinglun'+id).focus();
-        $('#by-user-id'+id).val(author_id);
-        $('#username'+id).val(author_name);
-    }
+        {#点击编辑按钮#}
+        function editping(id,author_id,author_name) {
+            {% if current_user.is_authenticated %}
+            $('#pinglun'+id).attr('placeholder','回复'+author_name);
+            $('#pinglun'+id).focus();
+            $('#by-user-id'+id).val(author_id);
+            $('#username'+id).val(author_name);
+            {% else %}
+                alert("请先登录");
+            {% endif %}
+        }
 
     </script>
 
