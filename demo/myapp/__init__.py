@@ -59,11 +59,16 @@ def create_app(config_name):
     sslify = SSLify(app)
 
     #自定义过滤器截取字符数
-    @app.template_filter('reverse')
+    @app.template_filter('filter')
     def filter(s):
         return s[0:300]
+    # 或者
+    # def filter(s):
+    #     return s[0:300]
+    # app.jinja_env.filters['filter'] = filter
 
-    app.jinja_env.filters['filter'] = filter
+    #添加jiaja2扩展支持break,continue
+    app.jinja_env.add_extension('jinja2.ext.loopcontrols')
     return app
 
 

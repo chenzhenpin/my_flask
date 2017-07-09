@@ -6,7 +6,7 @@ from . import main
 from .forms import EditProfileForm,EditProfileAdminForm,PostForm,EditArticleForm,SearchArticleForm
 from .. import db
 from flask_login import login_required,current_user
-from ..models import User,Role,Post,Comment,Whoosh,Permission,Heart,Article,Collect
+from ..models import User,Role,Post,Comment,Whoosh,Permission,Heart,Article,Collect,Follow
 from ..celery_email import sub
 from ..decorators import admin_required, permission_required
 from ..defs import datedir
@@ -53,7 +53,28 @@ def user(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         abort(404)
-    return render_template('user.html', user=user)
+    user_flag =(request.cookies.get('user_flag', '1'))
+    print(user_flag)
+    page=request.args.get('page',1,type=int)
+    if user_flag=='2':
+        pagination=user.articles.filter(Article.disabled!=2).paginate(
+            page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out=False)
+        articles = pagination.items
+        return render_template('user.html', user=user,articles=articles,user_flag=user_flag,pagination=pagination)
+    if user_flag=='3':
+        pagination=Article.query.join(Collect,Collect.user_id==user.id).filter(Article.id==Collect.article_id).filter(Article.disabled!=2).paginate(
+            page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
+            error_out=False)
+        articles = pagination.items
+        return render_template('user.html', user=user,articles=articles,user_flag=user_flag,pagination=pagination)
+    user_flag ='1'
+    pagination=user.posts.paginate(
+        page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
+        error_out=False)
+    posts = pagination.items
+    print(posts)
+    return render_template('user.html', user=user, posts=posts, user_flag=user_flag, pagination=pagination)
 
 @main.route('/edit-profile', methods=['GET', 'POST'])
 @login_required
@@ -153,10 +174,12 @@ def articles():
 
 
 
-    show_followed = False
+    show_article_followed = False
     if current_user.is_authenticated:
-        show_followed = bool(request.cookies.get('show_followed', ''))
+        show_article_followed = bool(request.cookies.get('show_article_followed', ''))
 
+
+    #搜索部分
     if form.validate_on_submit():
         pagination=Article.query.whoosh_search(form.keyword.data.strip())\
             .order_by(Article.timestamp.desc()).paginate(
@@ -166,17 +189,17 @@ def articles():
         return render_template('articles.html', show_followed=show_followed, form=form,
                                articles=articles, pagination=pagination)
 
-    if show_followed:
+    if show_article_followed:
         query = current_user.follwed_articles
     else:
         query = Article.query
-    query=query.filter_by(disabled=None)
+    query=query.filter(Article.disabled==0)
     pagination = query.order_by(Article.timestamp.desc()).paginate(
         page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out=False)
     articles = pagination.items
 
-    return render_template('articles.html',show_followed=show_followed,form=form,
+    return render_template('articles.html',show_article_followed=show_article_followed,form=form,
                            articles=articles,pagination=pagination)
 @main.route('/article/<int:id>',methods=['GET','POST'])
 def article(id):
@@ -233,9 +256,27 @@ def delete_article(id):
     article=Article.query.get_or_404(id)
     if current_user !=article.author :
         abort(403)
-    article.disabled=False
+    article.disabled=2
     db.session.add(article)
     return redirect(url_for('.articles'))
+@main.route('/disabled/article/<int:id>')
+def disabled_article(id):
+    article=Article.query.get_or_404(id)
+    print (article.disabled+1000)
+    if article.author!=current_user :
+        abort(404)
+    if article.disabled==0:
+        article.disabled=1
+        db.session.add(article)
+        db.session.commit()
+    elif article.disabled==1:
+        article.disabled=0
+        db.session.add(article)
+        db.session.commit()
+    print (article.disabled+1000)
+    return redirect(url_for('.user',username=article.author.username))
+
+
 
 
 
@@ -300,7 +341,7 @@ def followed_by(username):
     return render_template('followers.html', user=user, title="Followed by",
                            endpoint='.followed_by', pagination=pagination,
                            follows=follows)
-#显示所有文章
+#所有动态
 @main.route('/all')
 @login_required
 def show_all():
@@ -308,12 +349,52 @@ def show_all():
     resp.set_cookie('show_followed', '', max_age=30*24*60*60)
     return resp
 
-#只展示关注者的文章
+#只展示关注者的动态
 @main.route('/followed')
 @login_required
 def show_followed():
     resp = make_response(redirect(url_for('.index')))
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
+    return resp
+
+#所有文章
+@main.route('/article/all')
+def show_article_all():
+    resp = make_response(redirect(url_for('.articles')))
+    resp.set_cookie('show_article_followed', '', max_age=30*24*60*60)
+    return resp
+#关注着文章
+@main.route('/article/followed')
+@login_required
+def show_article_followed():
+    resp = make_response(redirect(url_for('.articles')))
+    resp.set_cookie('show_article_followed', '1', max_age=30*24*60*60)
+    return resp
+
+@main.route('/user_post/<username>')
+@login_required
+def user_post(username):
+    resp = make_response(redirect(url_for('.user',username=username)))
+    resp.set_cookie('user_flag', '1', max_age=30*24*60*60)
+    return resp
+
+@main.route('/user_article/<username>')
+@login_required
+def user_article(username):
+    resp = make_response(redirect(url_for('.user',username=username)))
+    resp.set_cookie('user_flag', '2', max_age=30*24*60*60)
+    return resp
+
+@main.route('/user_collect/<username>')
+def user_collect(username):
+
+    resp = make_response(redirect(url_for('.user', username=username)))
+    if current_user._get_current_object().username==username:
+        resp.set_cookie('user_flag', '3', max_age=30 * 24 * 60 * 60)
+    else:
+        resp.set_cookie('user_flag', '1', max_age=30 * 24 * 60 * 60)
+
+
     return resp
 
 #评论

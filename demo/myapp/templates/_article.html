@@ -1,6 +1,11 @@
 
 <ul class="articles" style="padding: 0px">
 {% for article in articles %}
+    {% if current_user!=article.author %}
+        {% if article.disabled==1 %}
+            {%  continue  %}
+        {% endif %}
+    {% endif %}
     <div  class="row article" style="padding-top: 50px;margin-left: 0px">
     <div class="article-head">
         <div style="float: left">
@@ -12,6 +17,17 @@
             <p style="font-size: 16px;margin-bottom: 0px">{{ article.author.username }}</p>
             <p style="font-size: 13px;color: #87928a;margin-top: 0px">{{ moment(article.timestamp).fromNow(refresh=True) }}</p>
         </div>
+        {% if current_user==article.author %}
+        <div style="float: right">
+            <a href="{{ url_for('.disabled_article',id=article.id) }}">
+                {% if article.disabled==0  %}
+                可见
+                {% else %}
+                不可见
+                {% endif %}
+            </a>
+        </div>
+        {% endif %}
     </div>
     <div class="article-content" style="clear: both">
         <div class="article-title">
@@ -31,7 +47,7 @@
             {% else %}
              {{ article.body_text }}
             {% endif %}
-        <p style="margin-top: 10px;color: #5f6d64"><label>阅读{{ article.views }}</label>
+        <p style="margin-top: 10px;color: #5f6d64;font-size: small"><label>阅读{{ article.views }}</label>
             <label>点赞{{ article.hearts.count() }}</label>
             <label>评论{{ article.comments.count() }}</label>
         </p>

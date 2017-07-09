@@ -328,6 +328,9 @@ class User(db.Model,UserMixin):
         if self.img_url==None:
             return 'img/w.jpg'
         return self.img_url
+    @property
+    def article_count(self):
+        return Article.query.filter(Article.author_id==self.id).filter(Article.disabled!=2)
 
     #返回模型信息
     def __repr__(self):
@@ -408,7 +411,7 @@ class Article(db.Model):
     body_text = db.Column(db.Text)
     cls = db.Column(db.Integer, default=0)  # 类型
     file_urls = db.Column(db.Text)  # 上传文件的地址
-    disabled = db.Column(db.Boolean)
+    disabled = db.Column(db.Integer,default=0) # 2删除，1不可见。0可见
     views = db.Column(db.Integer, default=1)  # 浏览次数
     collects = db.relationship('Collect', backref='article', lazy='dynamic')
     timestamp = db.Column(db.DateTime(), index=True, default=datetime.utcnow)

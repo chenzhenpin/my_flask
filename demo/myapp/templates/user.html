@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 {% block title %}Flasky{% endblock %}
 {% block page_content %}
+    <div style="margin-top: 50px">
+    <div class="col-md-3">
     <div class="page-header">
-        <div><img class="img-rounded profile-thumbnail" src="{{ url_for('static',filename=current_user.img )}}"width="150" height="150"></div>
+        <div><img class="img-rounded profile-thumbnail" src="{{ url_for('static',filename=user.img )}}"width="150" height="150"></div>
         <div class="profile-header">
         <h1>{{ user.username }}</h1>
         {% if user.name or user.location %}
@@ -20,7 +23,8 @@
         {% endif %}
         {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
         <p>
-        注册时间 {{ moment(user.member_since).format('L') }}.
+            注册时间 {{ moment(user.member_since).format('L') }}
+        <p>
         最近在线时间 {{ moment(user.last_seen).fromNow() }}.
         </p>
         <p>
@@ -31,11 +35,26 @@
                 <a href="{{ url_for('.unfollow', username=user.username) }}" class="btn btn-default">取消关注</a>
                 {% endif %}
             {% endif %}
-            <a href="{{ url_for('.followers', username=user.username) }}">粉丝: <span class="badge">{{ user.followers.count() - 1 }}</span></a>
-            <a href="{{ url_for('.followed_by', username=user.username) }}">关注的人: <span class="badge">{{ user.followed.count() - 1 }}</span></a>
+            <a  {% if current_user==user %}
+                href="{{ url_for('.followers', username=user.username )}}"
+                {% else %}
+                href="#"
+                {% endif %}
+            >粉丝: <span class="badge">{{ user.followers.count() - 1 }}</span></a>
+
+            <a {% if current_user==user %}
+                    href="{{ url_for('.followed_by', username=user.username) }}"
+                {% else %}
+                    herf="#"
+                {% endif %}
+            >关注的人: <span class="badge">{{ user.followed.count() - 1 }}</span></a>
             {% if current_user.is_authenticated and user != current_user and user.is_following(current_user) %}
-            | <span class="label label-default">Follows you</span>
+            | <span class="label label-default">你的粉丝</span>
             {% endif %}
+        </p>
+        <p>动态<span class="badge">{{ user.posts.count() }}</span>
+            文章<span class="badge">{{  user.article_count.count()}}</span>
+            收藏<span class="badge">{{ user.collects.count() }}</span>
         </p>
         {% if user == current_user %}
             <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">
@@ -50,5 +69,48 @@
         {% endif %}
     </div>
     </div>
+    </div>
+    <div class="col-md-7">
+        <div class="article-tabs" >
+            <ul class="nav nav-tabs" style="margin-top: 20px;margin-bottom: 20px;">
+                <li{% if  user_flag=='1' %} class="active"{% endif %}><a href="{{ url_for('.user_post',username=user.username ) }}">动态</a></li>
 
+                    <li{% if user_flag=='2' %} class="active"{% endif %}><a href="{{ url_for('.user_article',username=user.username ) }}">文章</a></li>
+                {% if current_user==user%}
+                <li {% if user_flag=='3' %} class="active"{% endif %}><a href="{{ url_for('.user_collect',username=user.username) }}"  >收藏</a></li>
+                {% endif %}
+            </ul>
+            {% if user_flag=='2' %}
+                {% include '_article.html' %}
+            {% elif user_flag=='3'   %}
+                {% include '_article.html' %}
+            {% else %}
+                {% include '_posts.html' %}
+            {% endif %}
+
+        </div>
+        {#分页#}
+        <div style="margin-top: 50px;margin-bottom: 50px">
+            <div class="pagination ">
+            {{ macros.pagination_widget(pagination, '.user',username=user.username) }}
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="col-sm-2"></div>
+    </div>
+
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+    function article_focus(obj) {
+     obj.css('color','#337ab7');
+    }
+    function article_out(obj) {
+     obj.css('color','black');
+    }
+    </script>
 {% endblock %}
