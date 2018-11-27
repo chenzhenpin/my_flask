@@ -3095,3 +3095,520 @@ Parameters: (0, 29)
 Duration: 0.177797s
 Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:275 (disabled_article)
 
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.267021s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:161 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (67, 4)
+Duration: 0.112261s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:168 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (116, 7)
+Duration: 0.104526s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:168 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.author_id = %s AND articles.disabled != %s) AS anon_1
+Parameters: (1, 2)
+Duration: 0.129745s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:77 (user)
+
+Slow query: SELECT roles.id AS roles_id, roles.name AS roles_name, roles.`default` AS roles_default, roles.permissions AS roles_permissions 
+FROM roles 
+WHERE roles.id = %s
+Parameters: (1,)
+Duration: 0.209629s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\models.py:253 (can)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (71, 6)
+Duration: 0.115914s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:168 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (322, 2)
+Duration: 0.639633s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:168 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (85, 6)
+Duration: 0.598242s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:168 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (337, 3)
+Duration: 0.102298s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:168 (index)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.248651s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:163 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (158, 7)
+Duration: 0.191305s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:170 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (267, 7)
+Duration: 0.217247s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: UPDATE articles SET views=%s WHERE articles.id = %s
+Parameters: (2, 34)
+Duration: 0.145451s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:213 (article)
+
+Slow query: SELECT comments.id AS comments_id, comments.body AS comments_body, comments.timestamp AS comments_timestamp, comments.disabled AS comments_disabled, comments.author_id AS comments_author_id, comments.by_user_id AS comments_by_user_id, comments.post_id AS comments_post_id, comments.article_id AS comments_article_id, users_1.id AS users_1_id, users_1.email AS users_1_email, users_1.username AS users_1_username, users_1.password_hash AS users_1_password_hash, users_1.role_id AS users_1_role_id, users_1.confirmed AS users_1_confirmed, users_1.avatar_hash AS users_1_avatar_hash, users_1.name AS users_1_name, users_1.location AS users_1_location, users_1.about_me AS users_1_about_me, users_1.member_since AS users_1_member_since, users_1.last_seen AS users_1_last_seen, users_1.img_url AS users_1_img_url, users_2.id AS users_2_id, users_2.email AS users_2_email, users_2.username AS users_2_username, users_2.password_hash AS users_2_password_hash, users_2.role_id AS users_2_role_id, users_2.confirmed AS users_2_confirmed, users_2.avatar_hash AS users_2_avatar_hash, users_2.name AS users_2_name, users_2.location AS users_2_location, users_2.about_me AS users_2_about_me, users_2.member_since AS users_2_member_since, users_2.last_seen AS users_2_last_seen, users_2.img_url AS users_2_img_url 
+FROM comments LEFT OUTER JOIN users AS users_1 ON users_1.id = comments.author_id LEFT OUTER JOIN users AS users_2 ON users_2.id = comments.by_user_id 
+WHERE %s = comments.post_id
+Parameters: (7,)
+Duration: 0.395056s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.685489s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:164 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (1,)
+Duration: 0.801369s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (273, 7)
+Duration: 0.394693s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT hearts.id AS hearts_id, hearts.timestamp AS hearts_timestamp, hearts.user_id AS hearts_user_id, hearts.by_user_id AS hearts_by_user_id, hearts.post_id AS hearts_post_id, hearts.article_id AS hearts_article_id 
+FROM hearts 
+WHERE %s = hearts.post_id) AS anon_1
+Parameters: (7,)
+Duration: 0.279158s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT comments.id AS comments_id, comments.body AS comments_body, comments.timestamp AS comments_timestamp, comments.disabled AS comments_disabled, comments.author_id AS comments_author_id, comments.by_user_id AS comments_by_user_id, comments.post_id AS comments_post_id, comments.article_id AS comments_article_id 
+FROM comments 
+WHERE %s = comments.post_id) AS anon_1
+Parameters: (7,)
+Duration: 0.390842s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (210, 5)
+Duration: 0.193666s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.158647s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:202 (articles)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT collects.id AS collects_id, collects.timestamp AS collects_timestamp, collects.user_id AS collects_user_id, collects.disabled AS collects_disabled, collects.post_id AS collects_post_id, collects.article_id AS collects_article_id 
+FROM collects 
+WHERE %s = collects.user_id) AS anon_1
+Parameters: (2,)
+Duration: 0.127690s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:65 (user)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (458, 2)
+Duration: 0.228034s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:171 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (12, 8)
+Duration: 0.123594s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (476, 3)
+Duration: 0.114204s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.155989s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:204 (articles)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (307, 7)
+Duration: 0.138956s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (32, 8)
+Duration: 0.207905s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (497, 1)
+Duration: 0.158121s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (268, 5)
+Duration: 0.144594s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (337, 7)
+Duration: 0.143131s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (294, 5)
+Duration: 0.142462s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (538, 3)
+Duration: 0.106787s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:173 (index)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.227734s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts) AS anon_1
+Parameters: ()
+Duration: 0.123619s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (22, 9)
+Duration: 0.223606s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (33, 9)
+Duration: 0.101074s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (591, 3)
+Duration: 0.243443s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (8, 8)
+Duration: 0.443278s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (2,)
+Duration: 0.128389s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (558, 1)
+Duration: 0.130614s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT hearts.id AS hearts_id, hearts.timestamp AS hearts_timestamp, hearts.user_id AS hearts_user_id, hearts.by_user_id AS hearts_by_user_id, hearts.post_id AS hearts_post_id, hearts.article_id AS hearts_article_id 
+FROM hearts 
+WHERE %s = hearts.post_id) AS anon_1
+Parameters: (1,)
+Duration: 0.186962s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users INNER JOIN hearts ON hearts.user_id = users.id 
+WHERE hearts.post_id = %s
+Parameters: (1,)
+Duration: 0.713513s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT comments.id AS comments_id, comments.body AS comments_body, comments.timestamp AS comments_timestamp, comments.disabled AS comments_disabled, comments.author_id AS comments_author_id, comments.by_user_id AS comments_by_user_id, comments.post_id AS comments_post_id, comments.article_id AS comments_article_id 
+FROM comments 
+WHERE %s = comments.post_id) AS anon_1
+Parameters: (1,)
+Duration: 0.193173s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT comments.id AS comments_id, comments.body AS comments_body, comments.timestamp AS comments_timestamp, comments.disabled AS comments_disabled, comments.author_id AS comments_author_id, comments.by_user_id AS comments_by_user_id, comments.post_id AS comments_post_id, comments.article_id AS comments_article_id 
+FROM comments 
+WHERE %s = comments.article_id) AS anon_1
+Parameters: (35,)
+Duration: 0.112405s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:207 (articles)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.704215s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (2,)
+Duration: 0.153220s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (44, 9)
+Duration: 0.120201s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.264708s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:203 (articles)
+
+Slow query: UPDATE articles SET views=%s WHERE articles.id = %s
+Parameters: (5, 35)
+Duration: 0.123681s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:214 (article)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles INNER JOIN follows ON follows.followed_id = articles.author_id 
+WHERE follows.follower_id = %s AND articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (2, 0, 0, 8)
+Duration: 0.127440s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:203 (articles)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.495255s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (2,)
+Duration: 0.213257s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (46, 9)
+Duration: 0.131444s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.278951s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:203 (articles)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.446061s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:203 (articles)
+
+Slow query: SELECT comments.id AS comments_id, comments.body AS comments_body, comments.timestamp AS comments_timestamp, comments.disabled AS comments_disabled, comments.author_id AS comments_author_id, comments.by_user_id AS comments_by_user_id, comments.post_id AS comments_post_id, comments.article_id AS comments_article_id, users_1.id AS users_1_id, users_1.email AS users_1_email, users_1.username AS users_1_username, users_1.password_hash AS users_1_password_hash, users_1.role_id AS users_1_role_id, users_1.confirmed AS users_1_confirmed, users_1.avatar_hash AS users_1_avatar_hash, users_1.name AS users_1_name, users_1.location AS users_1_location, users_1.about_me AS users_1_about_me, users_1.member_since AS users_1_member_since, users_1.last_seen AS users_1_last_seen, users_1.img_url AS users_1_img_url, users_2.id AS users_2_id, users_2.email AS users_2_email, users_2.username AS users_2_username, users_2.password_hash AS users_2_password_hash, users_2.role_id AS users_2_role_id, users_2.confirmed AS users_2_confirmed, users_2.avatar_hash AS users_2_avatar_hash, users_2.name AS users_2_name, users_2.location AS users_2_location, users_2.about_me AS users_2_about_me, users_2.member_since AS users_2_member_since, users_2.last_seen AS users_2_last_seen, users_2.img_url AS users_2_img_url 
+FROM comments LEFT OUTER JOIN users AS users_1 ON users_1.id = comments.author_id LEFT OUTER JOIN users AS users_2 ON users_2.id = comments.by_user_id 
+WHERE %s = comments.article_id ORDER BY comments.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (35, 0, 20)
+Duration: 0.100328s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:214 (article)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (135, 8)
+Duration: 0.141765s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.888305s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (2,)
+Duration: 0.566243s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (50, 9)
+Duration: 0.134167s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT hearts.id AS hearts_id, hearts.timestamp AS hearts_timestamp, hearts.user_id AS hearts_user_id, hearts.by_user_id AS hearts_by_user_id, hearts.post_id AS hearts_post_id, hearts.article_id AS hearts_article_id 
+FROM hearts 
+WHERE %s = hearts.post_id) AS anon_1
+Parameters: (9,)
+Duration: 0.105962s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT comments.id AS comments_id, comments.body AS comments_body, comments.timestamp AS comments_timestamp, comments.disabled AS comments_disabled, comments.author_id AS comments_author_id, comments.by_user_id AS comments_by_user_id, comments.post_id AS comments_post_id, comments.article_id AS comments_article_id 
+FROM comments 
+WHERE %s = comments.post_id) AS anon_1
+Parameters: (9,)
+Duration: 0.247944s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.107180s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:203 (articles)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.201205s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (2,)
+Duration: 0.328854s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT hearts.id AS hearts_id, hearts.timestamp AS hearts_timestamp, hearts.user_id AS hearts_user_id, hearts.by_user_id AS hearts_by_user_id, hearts.post_id AS hearts_post_id, hearts.article_id AS hearts_article_id 
+FROM hearts 
+WHERE %s = hearts.post_id) AS anon_1
+Parameters: (9,)
+Duration: 0.398951s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.831380s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:203 (articles)
+
+Slow query: SELECT count(*) AS count_1 
+FROM (SELECT follows.follower_id AS follows_follower_id, follows.followed_id AS follows_followed_id, follows.timestamp AS follows_timestamp 
+FROM follows 
+WHERE %s = follows.followed_id) AS anon_1
+Parameters: (2,)
+Duration: 0.146387s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:224 (article)
+
+Slow query: SELECT posts.id AS posts_id, posts.body AS posts_body, posts.body_html AS posts_body_html, posts.cls AS posts_cls, posts.file_urls AS posts_file_urls, posts.disabled AS posts_disabled, posts.views AS posts_views, posts.timestamp AS posts_timestamp, posts.author_id AS posts_author_id 
+FROM posts ORDER BY posts.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 8)
+Duration: 0.647952s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:165 (index)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (2,)
+Duration: 0.261191s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (55, 9)
+Duration: 0.168362s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (141, 8)
+Duration: 0.105779s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (413, 7)
+Duration: 0.105968s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: SELECT articles.id AS articles_id, articles.title AS articles_title, articles.body AS articles_body, articles.body_text AS articles_body_text, articles.cls AS articles_cls, articles.file_urls AS articles_file_urls, articles.disabled AS articles_disabled, articles.views AS articles_views, articles.timestamp AS articles_timestamp, articles.author_id AS articles_author_id 
+FROM articles 
+WHERE articles.disabled = %s ORDER BY articles.timestamp DESC 
+ LIMIT %s, %s
+Parameters: (0, 0, 8)
+Duration: 0.815463s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:203 (articles)
+
+Slow query: SELECT users.id AS users_id, users.email AS users_email, users.username AS users_username, users.password_hash AS users_password_hash, users.role_id AS users_role_id, users.confirmed AS users_confirmed, users.avatar_hash AS users_avatar_hash, users.name AS users_name, users.location AS users_location, users.about_me AS users_about_me, users.member_since AS users_member_since, users.last_seen AS users_last_seen, users.img_url AS users_img_url 
+FROM users 
+WHERE users.id = %s
+Parameters: (2,)
+Duration: 0.233191s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:207 (articles)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (58, 9)
+Duration: 0.165054s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (367, 4)
+Duration: 0.162010s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (148, 8)
+Duration: 0.266893s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:170 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (371, 6)
+Duration: 0.311232s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (371, 4)
+Duration: 0.380983s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+
+Slow query: UPDATE posts SET views=%s WHERE posts.id = %s
+Parameters: (422, 7)
+Duration: 0.141335s
+Context: C:\Users\chenzhen\Desktop\my_flask\demo\myapp\main\views.py:172 (index)
+

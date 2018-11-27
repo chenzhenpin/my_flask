@@ -1,0 +1,169 @@
+{% extends "base/front.html" %}
+
+{% block title %}Interest Blog Resources | SaintIC{% endblock %}
+
+{% block content %}
+
+{% if request.args.get("resources_type") in ("tag", "catalog", "source") and request.args.get("resources_data") %}
+<article class="post">
+
+  <header class="post-header">
+    <scan class="post-title">
+      <font itemprop="name headline">Resources:</font>
+      <font size="6px" color="red">{{ request.args.get("resources_type") }}</font>
+    </scan>
+  </header>
+
+  <div class="post-content">
+    <div>
+        <p><font color="green" class="page-heading">{{ request.args.get("resources_data") }}&nbsp;<span class="badge green" id="resources_number"></span></font></p>
+        <ul class="post-list" id="resources_data">
+        </ul>
+    </div>
+  </div>
+</article>
+
+{% else %}
+<article class="post">
+  <header class="post-header">
+      <p>标签云<code>tags</code><span class="badge green" id="tag_number"></span></p>
+  </header>
+  <div class="post-content" itemprop="articleBody" id="misc_tags">
+  </div>
+
+  <header class="post-header">
+      <p>分类目录<code>catalogs</code><span class="badge yellow" id="catalog_number"></span></p>
+  </header>
+  <div class="post-content" itemprop="articleBody" id="misc_catalogs">
+  </div>
+
+  <header class="post-header">
+      <p>文章类型<code>sources</code><span class="badge red" id="sources_number">3</span></p>
+  </header>
+  <div class="post-content" itemprop="articleBody" id="misc_sources">
+    {% for source in ("原创", "转载", "翻译") %}
+        <a href="/blog/resources/?resources_type=source&resources_data={{ source }}" target="_blank"><scan class="badge red">{{ source }}</scan></a>
+    {% endfor %}
+  </div>
+</article>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+{% if request.args.get("resources_type") == "tag" and request.args.get("resources_data") %}
+<script type="text/javascript">
+    // 获取资源数据
+    $.ajax({
+        url: "{{ g.apiurl }}/blog?get_tags_data={{ request.args.get('resources_data') }}&limit=all",
+        method: 'GET',
+        datatype: 'json',
+        success: function(res) {
+            console.log(res);
+            var data = res.data;
+            var str2 = '';
+            for(i=0; i<data.length; i++) {
+                tag_data  =  data[i];
+                str2 += '<li><scan><a href="/blog/' + tag_data.id + '.html" target="_blank">' + tag_data.title + '</a>&nbsp;<sub>' + tag_data.tag + '</sub></scan></li>';
+            };
+            document.getElementById('resources_number').innerHTML=data.length;
+            document.getElementById('resources_data').innerHTML=str2;
+        },
+        error: function(error){
+            alert(error);
+        }
+    });
+</script>
+{% elif request.args.get("resources_type") == "catalog" and request.args.get("resources_data") %}
+<script type="text/javascript">
+    // 获取资源数据
+    $.ajax({
+        url: "{{ g.apiurl }}/blog?get_catalog_data={{ request.args.get('resources_data') }}&limit=all",
+        method: 'GET',
+        datatype: 'json',
+        success: function(res) {
+            console.log(res);
+            var data = res.data;
+            var str2 = '';
+            for(i=0; i<data.length; i++) {
+                catalog_data  =  data[i];
+                str2 += '<li><scan><a href="/blog/' + catalog_data.id + '.html" target="_blank">' + catalog_data.title + '</a>&nbsp;<sub>' + catalog_data.catalog + '</sub></scan></li>';
+            };
+            document.getElementById('resources_number').innerHTML=data.length;
+            document.getElementById('resources_data').innerHTML=str2;
+        },
+        error: function(error){
+            alert(error);
+        }
+    });
+</script>
+{% elif request.args.get("resources_type") == "source" and request.args.get("resources_data") %}
+<script type="text/javascript">
+    // 获取资源数据
+    $.ajax({
+        url: "{{ g.apiurl }}/blog?get_sources_data={{ request.args.get('resources_data') }}&limit=all",
+        method: 'GET',
+        datatype: 'json',
+        success: function(res) {
+            console.log(res);
+            var data = res.data;
+            var str2 = '';
+            for(i=0; i<data.length; i++) {
+                source_data  =  data[i];
+                str2 += '<li><scan><a href="/blog/' + source_data.id + '.html" target="_blank">' + source_data.title + '</a>&nbsp;<sub>' + source_data.sources + '</sub></scan></li>';
+            };
+            document.getElementById('resources_number').innerHTML=data.length;
+            document.getElementById('resources_data').innerHTML=str2;
+        },
+        error: function(error){
+            alert(error);
+        }
+    });
+</script>
+{% else %}
+<script type="text/javascript">
+    // 获取文章标签信息
+    $.ajax({
+        url: "{{ g.apiurl }}/blog?get_tags_list=true",
+        method: 'GET',
+        datatype: 'json',
+        success: function(res) {
+            console.log(res);
+            var data = res.data;
+            var str2 = '';
+            for(i=0; i<data.length; i++) {
+                tag = data[i];
+                str2 += '<a href="/blog/resources/?resources_type=tag&resources_data=' + tag + '" target="_blank"><scan class="badge green">' + tag +'</scan></a>&nbsp;';
+                if(i%5==0 && i!=0) {
+                    str2 += '<br/ >';
+                }
+            };
+            document.getElementById('tag_number').innerHTML=data.length;
+            document.getElementById('misc_tags').innerHTML=str2;
+        },
+        error: function(error){
+            console.log(error);
+        }
+    });
+    // 获取文章分类信息
+    $.ajax({
+        url: "{{ g.apiurl }}/blog?get_catalog_list=true",
+        method: 'GET',
+        datatype: 'json',
+        success: function(res) {
+            console.log(res);
+            var data = res.data;
+            var str2 = '';
+            for(i=0; i<data.length; i++) {
+                catalog = data[i];
+                str2 += '<a href="/blog/resources/?resources_type=catalog&resources_data=' + catalog + '" target="_blank"><scan class="badge yellow">' + catalog +'</scan></a>&nbsp;';
+            };
+            document.getElementById('catalog_number').innerHTML=data.length;
+            document.getElementById('misc_catalogs').innerHTML=str2;
+        },
+        error: function(error){
+            console.log(error);
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

@@ -5,7 +5,7 @@
             <div class="row-fluid post-head" style="margin-top: 70px;">
                 <div style="float: left">
                     <a href="{{ url_for('.user', username=post.author.username) }}" >
-                        <img class="media-object img-circle " src="{{ url_for('static',filename=current_user.img )}}" alt="..." style=" width:40px;height: 40px;">
+                        <img class="media-object img-circle " src="{{ url_for('static',filename=post.author.img )}}" alt="..." style=" width:40px;height: 40px;">
                     </a>
                 </div>
                 <div style="float: left;margin-left: 2%;margin-bottom: 10px">
@@ -28,16 +28,19 @@
 
 
 
-                <div class="post-body-media" style="clear: both">
+                <div class="post-body-media" style="clear: both;margin-top: 10px;margin-bottom: 10px;">
                     {% if post.cls==1%}
 
-                        <div style="margin-top: 10px;margin-bottom: 10px" class="images">
+
+
 
                                 {% for file_url in post.file_urls.split(';') %}
-                                     <img src="{{ url_for('static',filename=file_url )}}" alt="" style="height:auto;width:49% ;float: left;margin: 2px; " >
+                                    <div style="height:auto;width:33% ;float: left;" class="images" >
+
+                                     <img src="{{ url_for('static',filename=file_url )}}" alt="" style="width:100% ;">
+                                    </div>
                                 {% endfor %}
 
-                        </div>
                     {% elif post.cls==2%}
                         <div >
                             {#<video id="example_video_1" class="video-js vjs-default-skin vjs-big-play-centered"
@@ -46,7 +49,7 @@
                              <source src="{{post.file_urls}}"  />
                              <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>
                          </video>#}
-                            <video  height=auto width=100% controls preload="auto" style="margin-bottom: 10px;margin-top: 10px" >
+                            <video  height=auto width=100% controls preload="auto"  >
                                 {#                             <source src="{{post.file_urls}}"  />#}
                                 <source src="{{ url_for('static',filename=post.file_urls) }}" />
                                 <p>To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="{{post.file_urls}}" target="_blank">supports HTML5 video</a></p>

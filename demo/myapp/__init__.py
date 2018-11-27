@@ -1,11 +1,11 @@
 #coding=utf-8
 from flask import Flask,request,session
 from myapp.extension import socketio,db,login_manager,pagedown,moment,\
-                            bootstrap,babel,admin,toolbar,mogodb,mail,photos,videos,celery
+                            bootstrap,babel,admin,toolbar,mogodb,mail,photos,videos,celery,filecache
 import flask_whooshalchemyplus
 from flask_uploads import configure_uploads
 from config import config,Config
-
+from myapp.defs import cn_to_utc,utc_to_cn
 from flask_sslify import SSLify
 import re
 
@@ -47,6 +47,7 @@ def create_app(config_name):
     login_manager.init_app(app)
     admin.init_app(app)
     socketio.init_app(app)
+    filecache.init_app(app)
     #toolbar.init_app(app)
     mogodb.init_app(app)
     celery.conf.update(app.config)
@@ -62,12 +63,22 @@ def create_app(config_name):
     @app.template_filter('filter')
     def filter(s):
         return s[0:300]
+
+    @app.template_filter('utctime')
+    def utctime(s):
+        utctime=cn_to_utc(s)
+        return utctime
+
+    @app.template_filter('nowtime')
+    def nowtime(s):
+        nowtime=utc_to_cn(s)
+        return nowtime
     # 或者
     # def filter(s):
     #     return s[0:300]
     # app.jinja_env.filters['filter'] = filter
 
-    #添加jiaja2扩展支持break,continue
+    #添加jiaja2循环扩展支持break,continue
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')
     return app
 

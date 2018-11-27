@@ -24,7 +24,7 @@ import os
 
 
 
-@auth.route('/login', methods=['GET', 'POST'])
+@auth.route('/      ', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -55,8 +55,8 @@ def register():
                     password=form.password.data)
         db.session.add(user)
         db.session.commit()
-        # user=User.query.filter_by(username=form.username.data).first()
-        # user.user_init()
+        user=User.query.filter_by(username=form.username.data).first()
+        user.user_init()
         token = user.generate_confirmation_token()
         send_email(user.email, 'Confirm Your Account',
                    'auth/email/confirm', user=user, token=token)

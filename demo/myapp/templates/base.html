@@ -9,7 +9,7 @@
     {% endblock %}
 
 {% block navbar %}
-<div class="navbar navbar-default" role="navigation" style="margin-bottom: 0px ;padding-top: 5px">
+<div class="navbar " role="navigation" style="margin-bottom: 0px ;padding-top: 5px">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -69,7 +69,8 @@
                         </ul>
                     </li>
                 {% else %}
-                    <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+                    <li><a href="{{ url_for('auth.login') }}">登录</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">注册</a></li>
                 {% endif %}
             </ul>
 

@@ -2,7 +2,7 @@
 #coding=utf-8
 import os
 from myapp import create_app, db
-from myapp.models import User, Role,Post,Follow,Whoosh,Article,Heart,Collect,Comment
+from myapp.models import User, Role,Post,Follow,Whoosh,Article,Heart,Collect,Comment,Tag
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 from flask_script.commands import Server,Option
@@ -75,7 +75,7 @@ manager.add_command("runserver", Server())
 #为shell命令定义回调函数，自动导入模块
 def make_shell_context():
     return dict(app=app, db=db, User=User, Role=Role,Post=Post,Follow=Follow,Whoosh=Whoosh,
-                Comment=Comment,Heart=Heart,Article=Article,Collect=Collect)
+                Comment=Comment,Heart=Heart,Article=Article,Collect=Collect,Tag=Tag)
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 

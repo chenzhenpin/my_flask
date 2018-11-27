@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from datetime import datetime
-from markdown import markdown
+from markdown import markdown,Markdown
 import bleach
 from jieba.analyse.analyzer import ChineseAnalyzer
 from myapp.extension import db,login_manager
@@ -165,21 +165,21 @@ class User(db.Model,UserMixin):
                                lazy='dynamic',cascade='all, delete-orphan')
     #comments = db.relationship('Whoosh', backref='author', lazy='dynamic')
 
-    def __init__(self,**kwargs):
-        super(User,self).__init__(**kwargs)
-        if self.role is None:
-            if self.email == current_app.config['FLASKY_ADMIN']:
-                self.role = Role.query.filter_by(permissions=0xff).first()
-        if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
-        self.follow(self)#自己关注自己
-    # def user_init(self):
+    # def __init__(self,**kwargs):
+    #     super(User,self).__init__(**kwargs)
     #     if self.role is None:
     #         if self.email == current_app.config['FLASKY_ADMIN']:
     #             self.role = Role.query.filter_by(permissions=0xff).first()
     #     if self.role is None:
     #         self.role = Role.query.filter_by(default=True).first()
     #     self.follow(self)#自己关注自己
+    def user_init(self):
+        if self.role is None:
+            if self.email == current_app.config['FLASKY_ADMIN']:
+                self.role = Role.query.filter_by(permissions=0xff).first()
+        if self.role is None:
+            self.role = Role.query.filter_by(default=True).first()
+        self.follow(self)#自己关注自己
 
     #确认账户
     #生成令牌
@@ -288,6 +288,7 @@ class User(db.Model,UserMixin):
         if not self.is_following(user):
             f = Follow(follower=self, followed=user)
             db.session.add(f)
+            db.session.commit()
 
     # 删除关注
     def unfollow(self, user):
@@ -366,24 +367,24 @@ class Post(db.Model):
             db.session.add(p)
             db.session.commit()
 
-    @staticmethod
-    def on_changed_body(target, value, oldvalue, initiator):
-        #过滤不在白名单的标签
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
-
-        target.body_html = bleach.clean(value,tags=allowed_tags, strip=True)
-
     # @staticmethod
     # def on_changed_body(target, value, oldvalue, initiator):
+    #     #过滤不在白名单的标签
     #     allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
     #                     'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
     #                     'h1', 'h2', 'h3', 'p']
     #
-    #     target.body_html = bleach.linkify(bleach.clean(
-    #         markdown(value, output_format='html'),
-    #         tags=allowed_tags, strip=True))
+    #     target.body_html = bleach.clean(value,tags=allowed_tags, strip=True)
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True))
     #获取点赞的用户
     #发送connect事件
     @property
@@ -395,15 +396,28 @@ class Post(db.Model):
     def add_views(self):
         self.views=self.views+1
 
+    #返回文章目录
+
+
+
+
 
 db.event.listen(Post.body, 'set', Post.on_changed_body) #Post.body字段值改变会自动调用Post.on_changed_body函数
+
+
+
+registrations = db.Table('registrations',
+db.Column('article_id', db.Integer, db.ForeignKey('articles.id')),
+db.Column('tag_id', db.Integer, db.ForeignKey('tags.id'))
+)
+
 
 
 #whoosh是在数据插进数据库的时候建立索引，也就是说，
 # 不在whoosh监控下的插入数据库的数据是不能被whoosh索引到的。
 class Article(db.Model):
-    __searchable__ = ['body','title']
-    __analyzer__ = ChineseAnalyzer()
+    __searchable__ = ['body','title'] #whoosh索引的字段
+    __analyzer__ = ChineseAnalyzer() #中文粉丝
     __tablename__ = 'articles'
     id = db.Column(db.Integer, primary_key=True)
     title=db.Column(db.String(64))
@@ -418,6 +432,12 @@ class Article(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     hearts = db.relationship('Heart', backref='article', lazy='dynamic')
     comments = db.relationship('Comment',backref='article', lazy='dynamic')
+
+    tags = db.relationship('Tag',
+                              secondary=registrations,
+                              backref=db.backref('articles', lazy='dynamic'),
+                              lazy='dynamic')#多对多关系
+
 
     #
     @staticmethod
@@ -439,9 +459,47 @@ class Article(db.Model):
         self.views = self.views + 1
         return self.views
 
+    # @property
+    # def toc(self):
+    #
+    #     md = Markdown(extensions=[
+    #         'markdown.extensions.extra',
+    #         'markdown.extensions.codehilite',
+    #         'markdown.extensions.toc',
+    #     ])
+    #     self.body = md.convert(self.body)
+    #     db.session.add(self)
+    #
+    #     print('--------------wqeeeqw--------------------')
+    #     return md.toc
+
     def __repr__(self):
         return '<Whoosh %r>' % (self.title)
 db.event.listen(Article.body, 'set', Article.on_changed_body)
+
+
+
+class Tag(db.Model):
+    __tablename__ = 'tags' #加上表名否则迁移会有错
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20))
+
+    def __repr__(self):
+        return '<Tag: %r>' % self.name
+
+    """
+    添加
+    tag=Tag(name='python')
+    a=Article.query.first()
+    a.tags.append(tag)
+    db.session.add(a)
+    db.session.commit()
+    删除
+    a.tags.remove(tag)
+    db.session.commit()
+    """
+
+
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -455,6 +513,15 @@ class File(db.Model):
     status=db.Column(db.Boolean,default=False)
     timestamp=db.Column(db.DateTime(),default=datetime.utcnow)
 
+class Tuiku(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    tuiku_url=db.Column(db.String(128),unique=True)
+    form_url=db.Column(db.String(128))
+    title=db.Column(db.String(128))
+    timestamp=db.Column(db.DateTime,default=datetime.now)
+    content=db.Column(db.Text)
+    theme=db.Column(db.String(128))
+    website=db.Column(db.String(64))
 
 
 

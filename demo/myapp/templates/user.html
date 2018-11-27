@@ -105,6 +105,8 @@
 {% endblock %}
 {% block scripts %}
     {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/img_viewer/viewer.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='pro/img_viewer/viewer.js')}}"></script>
     <script type="text/javascript">
     function article_focus(obj) {
      obj.css('color','#337ab7');
@@ -112,5 +114,12 @@
     function article_out(obj) {
      obj.css('color','black');
     }
+    var h=$('.post-body-media .images ').width();
+            $('.post-body-media .images img ').height(h);
+        $(window).resize(function() {
+            var h=$('.post-body-media .images ').width();
+            $('.post-body-media .images img ').height(h);
+        });
+        $('.images').viewer();
     </script>
 {% endblock %}

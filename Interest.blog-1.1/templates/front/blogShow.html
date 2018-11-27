@@ -1,0 +1,192 @@
+{% extends "base/front.html" %}
+
+{% block title %}{{ data['title'] }} | SaintIC Interest Blog Detail{% endblock %}
+
+{% block head %}
+  {%- if g.plugins['CodeHighlighting'] %}
+  <link href="{{ url_for('static', filename='highlight/styles/googlecode.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='highlight/highlight.pack.js') }}"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  {% endif -%}
+{% endblock %}
+
+{% block content %}
+
+<article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">{{ data['title'] }}</h1>
+        <!--<p class="post-meta">Author: {{ data['author'] }}</p>-->
+        <p class="post-meta"><time datetime="2016-01-01T10:26:42+00:00" itemprop="datePublished">Create: {{ data['create_time'] }}</time></p>
+    {% if data.get("update_time") %}
+        <p class="post-meta"><time datetime="2016-01-01T10:26:42+00:00" itemprop="datePublished">Update: {{ data['update_time'] }}</time></p>
+    {% endif %}
+    {% if data['tag'] %}
+        <p class="post-meta">Tags: 
+        {% for tag in data['tag'].split() %}
+            <a href="{{ url_for('front.blogResources', resources_type='tag', resources_data=tag) }}" target="_blank"><scan class="badge green">{{ tag }}</scan></a>&nbsp;
+        {% endfor %}
+        </p>
+    {% endif %}
+    {% if data['catalog'] %}
+        <p class="post-meta">Catalog: <a href="{{ url_for('front.blogResources', resources_type='catalog', resources_data=data['catalog']) }}" target="_blank"><scan class="badge yellow">{{ data['catalog'] }}</scan></a></p>
+    {% endif %}
+    {% if data.get("sources") %}
+        <p class="post-meta">Sources: <a href="{{ url_for('front.blogResources', resources_type='source', resources_data=data.get('sources')) }}" target="_blank">
+        {% if data.get("sources") == "原创" %}
+            <img src="{{ url_for('static', filename='img/icon/Original.gif') }}" /></a></p>
+        {% elif data.get("sources") == "转载" %}
+            <img src="{{ url_for('static', filename='img/icon/Reprint.gif') }}" /></a></p>
+        {% elif data.get("sources") == "翻译" %}
+            <img src="{{ url_for('static', filename='img/icon/Translate.gif') }}" /></a></p>
+        {% endif %}
+    {% endif %}
+    {% if g.signin and g.username == data.get("author") or g.username == "admin" %}
+    <p class="post-meta">
+        <a href="{{ url_for('front.blogEdit', blogId=blogId) }}">编辑文章</a>&nbsp;
+        {% if g.username == "admin" %}
+        {% if data.top in ('true', 'True', True) %}
+        <a href="javascript:setTop(false)">取消置顶</a>&nbsp;
+        {% else %}
+        <a href="javascript:setTop(true)">置顶文章</a>&nbsp;
+        {% endif %}
+        {% if data.recommend in ('true', 'True', True) %}
+        <a href="javascript:setRecommend(false)">取消推荐</a>&nbsp;
+        {% else %}
+        <a href="javascript:setRecommend(true)">推荐文章</a>&nbsp;
+        {% endif %}
+        {% endif %}
+    </p>
+    {% endif %}
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    {{ data['content'] | safe }}
+  </div>
+
+  <div class="copyright">
+    {%- if data.get("sources") == "原创" %}
+    <pre style="max-width: 100%;"><code class="python hljs" codemark="1"><b>版权声明</b>：<br />
+    本文为原创文章，由<a href="http://www.saintic.com" target="_blank">SainIC</a>创作和发表，版权所有，转载请注明作者及出处！<br />
+    本文标题是：{{ data['title'] }}， 本文来源地址：<a href="{{ request.url }}">{{ request.url }}</a></code>
+    </pre>
+    {% endif -%}
+    {%- if g.plugins['BaiduShare'] %}
+    <!-- 百度分享插件 -->
+    <div class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more">分享给朋友</a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信">微信</a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博">新浪微博</a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友">QQ好友</a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间">QQ空间</a><a href="#" class="bds_huaban" data-cmd="huaban" title="分享到花瓣">花瓣</a><a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook">Facebook</a><a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter">Twitter</a><a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记">有道云笔记</a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享">邮件分享</a></div>
+    <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{"bdSize":16}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+    {% endif -%}
+  </div>
+</article>
+
+{%- if g.plugins['DuoshuoComment']['enable'] %}
+<!-- 多说评论框插件 start -->
+  <div class="ds-thread" data-thread-key="{{ blogId }}" data-title="{{ data['title'] }}" data-url="{{ request.url }}"></div>
+<!-- 多说评论框插件 end -->
+{% endif -%}
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+
+{% if g.plugins['BaiduAutoPush'] %}
+/* 百度自动推送插件 */
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+{% endif %}
+
+{% if g.plugins['DuoshuoComment']['enable'] %}
+/* 多说评论框公共JS代码 */
+var duoshuoQuery = {short_name:"{{ g.plugins['DuoshuoComment']['shortName'] }}"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+{% endif %}
+
+{% if g.plugins['360AutoPush'] %}
+/* 360自动推送插件 */
+(function(){
+   var src = (document.location.protocol == "http:") ? "http://js.passport.qihucdn.com/11.0.1.js?0804a1ea6759eb5939e26ae7531fb05a":"https://jspassport.ssl.qhimg.com/11.0.1.js?0804a1ea6759eb5939e26ae7531fb05a";
+   document.write('<script src="' + src + '" id="sozz"><\/script>');
+})();
+{% endif %}
+
+{% if g.username == "admin" %}
+// 设置或取消置顶文章
+function setTop(value) {
+    $.ajax({
+        url: "{{ g.apiurl }}/misc?action=top&blogId={{ blogId }}&value=" + value,
+        method: 'POST',
+        datatype: 'json',
+        success: function(res) {
+            console.log(res);
+            var res = res.success;
+            if (res==true) {
+                if(value==false) {
+                    alert("取消置顶成功！");
+                } else {
+                    alert("置顶文章成功！");
+                }
+            } else {
+                if(value==false) {
+                    alert("取消置顶失败！");
+                } else {
+                    alert("置顶文章失败！");
+                }
+            }
+            window.location.reload();
+        },
+        error: function(error){
+            console.log(error);
+        }
+    });
+}
+
+// 设置或取消推荐文章
+function setRecommend(value) {
+    $.ajax({
+        url: "{{ g.apiurl }}/misc?action=recommend&blogId={{ blogId }}&value=" + value,
+        method: 'POST',
+        datatype: 'json',
+        success: function(res) {
+            console.log(res);
+            var res = res.success;
+            if (res==true) {
+                if(value==false) {
+                    alert("取消推荐成功！");
+                } else {
+                    alert("推荐文章成功！");
+                }
+            } else {
+                if(value==false) {
+                    alert("取消推荐失败！");
+                } else {
+                    alert("推荐文章失败！");
+                }
+            }
+            window.location.reload();
+        },
+        error: function(error){
+            console.log(error);
+        }
+    });
+}
+{% endif %}
+</script>
+{% endblock %}

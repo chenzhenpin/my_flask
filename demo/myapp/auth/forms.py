@@ -5,32 +5,31 @@ from wtforms.validators import Required, Length, Email,Regexp,EqualTo
 from wtforms import ValidationError
 from ..models import User
 class  LoginForm(Form):
-    email = StringField('Email', validators=[Required(), Length(1, 64),
+    email = StringField('邮箱', validators=[Required(), Length(1, 64),
                                              Email()])
-    password = PasswordField('Password', validators=[Required()])
-    remember_me = BooleanField('Keep me logged in')
-    submit = SubmitField('Log In')
+    password = PasswordField('密码', validators=[Required()])
+    remember_me = BooleanField('记住我')
+    submit = SubmitField('登录')
 class RegistrationForm(Form):
-    email = StringField('Email', validators=[Required(), Length(1, 64),
+    email = StringField('邮箱', validators=[Required(), Length(1, 64),
     Email()])
 
-    username = StringField('Username', validators=[Required(), Length(1, 32),])
-    # username = StringField('Username', validators=[Required(), Length(1, 64),
-    #                                                Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
-    #                                                 'Usernames must have only letters, '
-    #                                                 'numbers, dots or underscores')])
-    password = PasswordField('Password', validators=[
-    Required(), EqualTo('password2', message='Passwords must match.')])
-    password2 = PasswordField('Confirm password', validators=[Required()])
-    submit = SubmitField('Register')
+    # username = StringField('Username', validators=[Required(), Length(1, 32),])
+    username = StringField('账号', validators=[Required(), Length(1, 64),
+                                                   Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
+                                                    '账号只允许英文字母和数字')])
+    password = PasswordField('密码', validators=[
+    Required(), EqualTo('password2', message='两次输入的密码不一样')])
+    password2 = PasswordField('确认密码', validators=[Required()])
+    submit = SubmitField('注册')
     #自定义email字段的验证函数
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
-            raise ValidationError('Email already registered.')
+            raise ValidationError('该邮箱已被注册')
     #自定义username字段的验证函数
     def validate_username(self, field):
         if User.query.filter_by(username=field.data).first():
-            raise ValidationError('Username already in use.')
+            raise ValidationError('改账号已被注册')
 
 class ChangePasswordForm(Form):
     old_password = PasswordField('Old password', validators=[Required()])

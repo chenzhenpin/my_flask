@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}{% endblock %}</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="keywords" content="博客,blog,Interest,IT">
+  <meta name="description" content="Linux,NoSQL,DevOps,python,Docker,redis,memcache,MongoDB,LVS,HA,LB,puppet,ansible,func,Cloud,BigData">
+  <link rel="canonical" href="https://www.saintic.com/">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link href="{{ url_for('static', filename='img/icon/favicon.ico') }}" rel="icon" type="image/x-icon" />
+  <link href="{{ url_for('static', filename='img/icon/favicon.ico') }}" rel="shortcut icon" type="image/x-icon" />
+  <meta name="baidu-site-verification" content="c32483e6768d7e94652d573f5fc98dbb"/>
+  <meta name="sogou_site_verification" content="sYvkD9e6sL"/>
+  <meta name="360-site-verification" content="37fa5889ab5705a9911a9fbbb96c061a" />
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  {% include "public/nav.html" %}
+
+  <div class="page-content">
+    <div class="wrapper">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  {% include "public/footer.html" %}
+
+<div id="goTopBtn"></div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.1.0.min.js') }}"></script>
+{% block script %}{% endblock %}
+<script type="text/javascript">
+    $(window).scroll(function(){
+      var sc=$(window).scrollTop();
+      var rwidth=$(window).width()
+      if(sc>0){
+        $("#goTopBtn").css("display","block");
+        $("#goTopBtn").css("left",(rwidth-36)+"px");
+      }else{
+        $("#goTopBtn").css("display","none");
+      }
+    })
+    $("#goTopBtn").click(function(){
+      var sc=$(window).scrollTop();
+      $('body,html').animate({scrollTop:0},500);
+    })
+</script>
+</body>
+</html>

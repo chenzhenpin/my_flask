@@ -32,7 +32,7 @@ class Config:
         },
     }
 
-    #SERVER_NAME='onlysee.6655.la'
+    SERVER_NAME='onlysee.6655.la'
 
     MONGODB_DB='test'
     MONGODB_HOST='127.0.0.1'

@@ -87,7 +87,7 @@
             function pop_image() {
                 {#设置表单的文件类型#}
                 $('#cls').val('1');
-                fileSum=8;//文件个数
+                fileSum=9;//文件个数
                 fileSizeOne=10 * 1024 * 1024;//单个文件大小
                 flieSizeSum=80 * 1024 * 1024;//总文件大小
                 file_extensions ='gif,jpg,jpeg,bmp,png';
@@ -150,6 +150,12 @@
     {#    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pro/webuploader/webuploader.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='pro/webuploader/webuploader.min.js') }}"></script>#}
     <script type="text/javascript">
+        var h=$('.post-body-media .images ').width();
+            $('.post-body-media .images img ').height(h);
+        $(window).resize(function() {
+            var h=$('.post-body-media .images ').width();
+            $('.post-body-media .images img ').height(h);
+        });
         $('.images').viewer();
 
         {#   $("#btn-postSay").click(function () {

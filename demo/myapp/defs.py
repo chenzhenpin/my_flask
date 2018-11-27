@@ -1,4 +1,4 @@
-import time,os
+import time,os,pytz
 def datedir(base):
     year=time.strftime('%Y',time.localtime(time.time()))
     #月份
@@ -22,3 +22,9 @@ def datedir(base):
             if not os.path.exists(fileDay):
                 os.mkdir(fileDay)
     return fileDay
+def utc_to_cn(utcnow):
+    sh=pytz.timezone('Asia/Shanghai')
+    return sh.fromutc(utcnow)
+def cn_to_utc(now):
+    utc=pytz.utc
+    return utc.fromutc(now)

@@ -11,7 +11,7 @@ from ..celery_email import sub
 from ..decorators import admin_required, permission_required
 from ..defs import datedir
 import os,shutil
-from ..extension import photos
+from ..extension import photos,filecache
 import bleach
 from markdown import markdown
 #报告缓慢的数据库查询
@@ -50,6 +50,7 @@ def for_moderators_only():
 
 @main.route('/user/<username>')
 def user(username):
+
     user = User.query.filter_by(username=username).first()
     if user is None:
         abort(404)
@@ -73,7 +74,6 @@ def user(username):
         page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
         error_out=False)
     posts = pagination.items
-    print(posts)
     return render_template('user.html', user=user, posts=posts, user_flag=user_flag, pagination=pagination)
 
 @main.route('/edit-profile', methods=['GET', 'POST'])
@@ -137,6 +137,7 @@ def img(username):
 
 
 @main.route('/', methods=['GET', 'POST'])
+#@filecache.memoize(timeout=50)
 def index():
     form = PostForm()
     # current_app.logger.debug('A value for debugging')
@@ -145,8 +146,11 @@ def index():
 
     if current_user.can(Permission.WRITE_ARTICLES) and \
     form.validate_on_submit():
+        if form.cls.data=='':
+            form.cls.data=None
         post = Post(body=form.body.data,author=current_user._get_current_object(),file_urls=form.file_urls.data,cls=form.cls.data)
         db.session.add(post)
+
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     show_followed = False
@@ -372,14 +376,12 @@ def show_article_followed():
     return resp
 
 @main.route('/user_post/<username>')
-@login_required
 def user_post(username):
     resp = make_response(redirect(url_for('.user',username=username)))
     resp.set_cookie('user_flag', '1', max_age=30*24*60*60)
     return resp
 
 @main.route('/user_article/<username>')
-@login_required
 def user_article(username):
     resp = make_response(redirect(url_for('.user',username=username)))
     resp.set_cookie('user_flag', '2', max_age=30*24*60*60)

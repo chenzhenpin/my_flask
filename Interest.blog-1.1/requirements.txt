@@ -1,0 +1,11 @@
+Flask==0.10.1
+tornado
+gevent
+setproctitle
+requests
+torndb
+MySQL-python
+SpliceURL>=1.2
+upyun>=2.4.2
+sh
+uwsgi
