@@ -13,7 +13,7 @@ Automat==0.5.0
 Babel==2.3.4
 beautifulsoup4==4.5.3
 billiard==3.3.0.23
-bleach==1.5.0
+bleach==3.1.1
 blinker==1.4
 boom==1.0
 Brlapi==0.6.4
