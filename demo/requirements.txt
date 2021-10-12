@@ -126,7 +126,7 @@ numpy==1.13.0
 oauthlib==2.0.2
 olefile==0.44
 onboard==1.2.0
-opencv-python==3.1.0.0
+opencv-python==3.4.0.12
 oslo.config==3.22.0
 oslo.context==2.12.1
 oslo.i18n==3.12.0
